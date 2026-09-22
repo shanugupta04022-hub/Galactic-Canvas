@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Galactic Canvas — Design Guideline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Spectral:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#05060C;
+  --deep:#0B0E1A;
+  --star:#ECE7DC;
+  --dim:#8C93A8;
+  --solar:#E7A93C;
+  --hair:rgba(236,231,220,.14);
+
+  --page-bg:#EFF1F5;
+  --page-ink:#14171F;
+  --page-dim:#5A6170;
+  --page-rule:rgba(20,23,31,.14);
+  --page-panel:#E4E8EF;
+
+  --display:"Bodoni Moda",Georgia,"Times New Roman",serif;
+  --body:"Spectral",Georgia,"Times New Roman",serif;
+
+  --mercury:#9A8F86; --venus:#C98F4B; --earth:#4E8FC4; --mars:#C05A3A;
+  --jupiter:#C9A177; --saturn:#D8C08A; --uranus:#7FBFC4; --neptune:#3F63B8;
+  --sun:#F2B63C;
+}
+:root:not([data-theme="light"]){
+  @media (prefers-color-scheme: dark){
+    --page-bg:#0A0C14; --page-ink:#E6E3DC; --page-dim:#8C93A8;
+    --page-rule:rgba(230,227,220,.16); --page-panel:#11141F;
+  }
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --page-bg:#0A0C14; --page-ink:#E6E3DC; --page-dim:#8C93A8;
+    --page-rule:rgba(230,227,220,.16); --page-panel:#11141F;
+  }
+}
+:root[data-theme="dark"]{
+  --page-bg:#0A0C14; --page-ink:#E6E3DC; --page-dim:#8C93A8;
+  --page-rule:rgba(230,227,220,.16); --page-panel:#11141F;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--page-bg); color:var(--page-ink);
+  font-family:var(--body); font-weight:300; font-size:17px; line-height:1.65;
+}
+img{max-width:100%}
+.wrap{max-width:1080px; margin:0 auto; padding:0 24px}
+
+/* ---------- masthead ---------- */
+.masthead{padding:88px 0 40px; border-bottom:1px solid var(--page-rule)}
+.masthead h1{
+  font-family:var(--display); font-weight:400; font-size:clamp(40px,7vw,72px);
+  line-height:1.02; letter-spacing:-.01em; margin:0 0 18px; max-width:15ch;
+}
+.lede{max-width:64ch; font-size:19px; color:var(--page-dim); margin:0}
+.meta{margin-top:26px; font-size:14px; color:var(--page-dim)}
+
+/* ---------- sections ---------- */
+section{padding:56px 0; border-bottom:1px solid var(--page-rule)}
+h2{
+  font-family:var(--display); font-weight:400; font-size:clamp(26px,3.4vw,36px);
+  margin:0 0 10px; letter-spacing:-.01em;
+}
+h3{font-family:var(--body); font-weight:600; font-size:17px; margin:34px 0 8px}
+p{max-width:68ch}
+ul{max-width:68ch; padding-left:20px}
+li{margin:6px 0}
+.sub{color:var(--page-dim); max-width:66ch; margin-top:0}
+code{font-family:var(--body); font-weight:600; background:var(--page-panel); padding:1px 5px; border-radius:3px; font-size:.95em}
+
+/* ---------- tokens ---------- */
+.swatches{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; margin-top:22px; padding:0; list-style:none}
+.swatch{border:1px solid var(--page-rule); border-radius:2px; overflow:hidden}
+.swatch .chip{height:56px}
+.swatch .nm{padding:8px 10px; font-size:13px; line-height:1.35}
+.swatch .nm b{display:block; font-weight:600}
+.swatch .nm span{color:var(--page-dim)}
+
+/* ---------- wireframe ---------- */
+pre.wire{
+  background:var(--page-panel); border:1px solid var(--page-rule); border-radius:3px;
+  padding:18px; overflow-x:auto; font-size:12.5px; line-height:1.5;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; margin:20px 0 0;
+}
+
+/* ============ LIVE STAGE (the product canvas) ============ */
+.stage-shell{margin-top:26px; border-radius:6px; overflow:hidden; border:1px solid var(--page-rule)}
+.stage{
+  position:relative; background:var(--void); color:var(--star);
+  min-height:520px; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,44%);
+  align-items:center; gap:24px; padding:52px 44px 132px;
+  isolation:isolate; overflow:hidden;
+}
+.stars{position:absolute; inset:0; z-index:0; pointer-events:none}
+.stars canvas{width:100%; height:100%; display:block}
+.stage-info, .planet-stage, .rail-zone{position:relative; z-index:1}
+
+.eyebrow{
+  font-size:13px; letter-spacing:.06em; color:var(--dim); margin:0 0 12px;
+  display:flex; align-items:center; gap:10px;
+}
+.eyebrow i{display:block; width:26px; height:1px; background:var(--hair)}
+.planet-name{
+  font-family:var(--display); font-weight:400; font-size:clamp(44px,6vw,68px);
+  line-height:1; margin:0 0 14px; letter-spacing:-.015em;
+}
+.hook{font-size:18px; line-height:1.6; color:#CFCABF; max-width:40ch; margin:0 0 26px}
+.stats{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px 26px; max-width:430px; margin:0 0 24px; padding:0; list-style:none}
+.stats li{border-top:1px solid var(--hair); padding-top:8px; margin:0}
+.stats .k{display:block; font-size:12.5px; color:var(--dim)}
+.stats .v{display:block; font-size:19px; font-variant-numeric:tabular-nums}
+.facts{margin:0; padding:0; list-style:none; max-width:44ch}
+.facts li{font-size:15px; color:#B9B5AC; padding-left:16px; position:relative; margin:7px 0}
+.facts li::before{content:""; position:absolute; left:0; top:.62em; width:5px; height:5px; border-radius:50%; background:var(--pc,var(--solar)); opacity:.8}
+
+/* planet */
+.planet-stage{display:flex; justify-content:center; align-items:center; min-height:300px}
+.orb-wrap{position:relative; width:min(340px,80%); aspect-ratio:1}
+.orb{
+  position:absolute; inset:0; border-radius:50%;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255,255,255,.34), rgba(255,255,255,0) 42%),
+    radial-gradient(circle at 68% 74%, rgba(0,0,0,.55), rgba(0,0,0,0) 58%),
+    var(--pc,#888);
+  box-shadow:0 0 70px -10px color-mix(in srgb, var(--pc,#888) 55%, transparent),
+             inset -18px -14px 46px rgba(0,0,0,.6);
+  animation:spin 42s linear infinite;
+  background-blend-mode:screen,multiply,normal;
+}
+.orb::after{
+  content:""; position:absolute; inset:0; border-radius:50%;
+  background:repeating-linear-gradient(0deg, rgba(255,255,255,.055) 0 6px, rgba(0,0,0,.05) 6px 14px);
+  mix-blend-mode:overlay; opacity:var(--bands,.35);
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ring{
+  position:absolute; left:-24%; right:-24%; top:48%; height:20%;
+  border-radius:50%; border:2px solid color-mix(in srgb, var(--pc,#ccc) 75%, transparent);
+  box-shadow:0 0 0 7px color-mix(in srgb, var(--pc,#ccc) 16%, transparent);
+  transform:rotate(-14deg); display:none;
+}
+.stage[data-planet="saturn"] .ring{display:block}
+.stage[data-planet="uranus"] .ring{display:block; transform:rotate(-82deg); left:-8%; right:-8%; border-width:1px}
+
+/* ---- orbit rail (journey progress) ---- */
+.rail-zone{
+  position:absolute; left:0; right:0; bottom:0; padding:0 44px 30px;
+  grid-column:1 / -1;
+}
+.rail{position:relative; height:64px}
+.rail-line{
+  position:absolute; left:0; right:0; top:42px; height:1px; background:var(--hair);
+}
+.rail-fill{
+  position:absolute; left:0; top:42px; height:1px; background:linear-gradient(90deg,var(--sun),var(--solar));
+  width:0; transition:width .5s cubic-bezier(.22,.7,.2,1);
+}
+.rail-sun{
+  position:absolute; left:0; top:42px; width:16px; height:16px; margin:-8px 0 0 -8px; border-radius:50%;
+  background:radial-gradient(circle at 40% 36%,#FFF1CE,var(--sun) 62%,#B9741C);
+  box-shadow:0 0 16px 2px rgba(242,182,60,.55);
+}
+.stop{
+  position:absolute; top:42px; transform:translate(-50%,-50%);
+  background:none; border:0; padding:14px; cursor:pointer; line-height:0;
+  border-radius:50%;
+}
+.stop .dot{
+  display:block; border-radius:50%; background:var(--pc); opacity:.42;
+  transition:transform .35s cubic-bezier(.22,.7,.2,1), opacity .35s ease, box-shadow .35s ease;
+}
+.stop:hover .dot{opacity:.75}
+.stop[aria-current="page"] .dot{
+  opacity:1; transform:scale(1.55);
+  box-shadow:0 0 0 1.5px rgba(236,231,220,.55), 0 0 18px 2px color-mix(in srgb,var(--pc) 60%,transparent);
+}
+.stop .tag{
+  position:absolute; left:50%; top:-2px; transform:translate(-50%,-100%);
+  font-size:11.5px; letter-spacing:.04em; color:var(--dim); white-space:nowrap;
+  opacity:0; transition:opacity .3s ease; line-height:1;
+}
+.stop[aria-current="page"] .tag{opacity:1; color:var(--star)}
+.stop:hover .tag{opacity:.85}
+.stop:focus-visible{outline:2px solid var(--solar); outline-offset:-6px}
+
+.caption{font-size:14px; color:var(--page-dim); margin-top:10px}
+
+/* ---------- do / don't ---------- */
+.rules{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:26px; margin-top:24px}
+.rules h3{margin-top:0}
+.rules ul{padding-left:18px}
+
+table{border-collapse:collapse; width:100%; margin-top:20px; font-size:15px}
+th,td{text-align:left; padding:9px 12px 9px 0; border-bottom:1px solid var(--page-rule); vertical-align:top}
+th{font-weight:600; font-size:13.5px; color:var(--page-dim)}
+td.num{font-variant-numeric:tabular-nums}
+
+footer{padding:44px 0 80px; color:var(--page-dim); font-size:14px}
+
+@media (max-width:860px){
+  .stage{grid-template-columns:1fr; padding:36px 24px 128px; text-align:left}
+  .planet-stage{order:-1; min-height:200px}
+  .orb-wrap{width:190px}
+  .rail-zone{padding:0 24px 26px}
+  .stats{grid-template-columns:1fr 1fr; gap:12px 16px}
+  .stop .tag{display:none}
+  .stop[aria-current="page"] .tag{display:block}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important; transition-duration:.01ms !important}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <h1>The Galactic Canvas</h1>
+    <p class="lede">A design guideline for the planet pages: a quiet star canvas, the planet held at right of centre, the reading column at left, and a miniature solar system along the bottom that shows how far the journey has come.</p>
+    <p class="meta">Applies to Stage 4 (planet pages). Stages 1–3 — Milky Way, Solar System, Sun — inherit the same canvas, type and rail.</p>
+  </header>
+
+  <section>
+    <h2>The idea in one line</h2>
+    <p>One planet, one screen, one column of text. The planet is the picture; the words sit beside it, never on top of it; the rail at the bottom answers the only navigation question a visitor has — <em>where am I in the solar system?</em></p>
+    <h3>Four rules that hold the whole site together</h3>
+    <ul>
+      <li><b>The canvas stays quiet.</b> Deep space, faint stars, nothing that competes with the planet.</li>
+      <li><b>The planet owns the right side.</b> Same position and same optical size band on every planet page, so moving between planets feels like turning your head, not reloading a page.</li>
+      <li><b>Text is a single narrow column.</b> Hook first, numbers second, story third. Never more than one screen.</li>
+      <li><b>Progress is always visible.</b> The rail is the only persistent chrome on the page.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Layout</h2>
+    <p class="sub">A two-part split on a full-height canvas, with the rail pinned to the bottom across both.</p>
+<pre class="wire">DESKTOP  (≥1024px)                       columns: 56% / 44%
+┌──────────────────────────────────────────────────────────┐
+│                                       ·        ·         │
+│  PLANET 04                                  ╭───────╮    │
+│  Mars                                      │  ◐ ◍   │    │  ← planet: vertically
+│  one-line hook, max 40ch                    ╰───────╯    │    centred, right block
+│                                                          │
+│  ┌ stat ─┬ stat ─┐        ·                              │
+│  └ stat ─┴ stat ─┘                                       │
+│  · three to five story facts                             │
+│                                                          │
+│   ☉───●──●──●──◉──●──●──●──●            (orbit rail)     │
+└──────────────────────────────────────────────────────────┘
+
+MOBILE (&lt;860px)
+┌──────────────────┐
+│      ╭─────╮     │  planet first, ~190px
+│      │  ◍  │     │
+│      ╰─────╯     │
+│  PLANET 04       │
+│  Mars            │
+│  hook            │
+│  ┌stat┬stat┐     │
+│  · facts         │
+│   ☉──●●●◉●●●●    │  rail compresses, labels
+└──────────────────┘   only on the current stop</pre>
+    <h3>Measurements</h3>
+    <ul>
+      <li>Canvas height: <code>100vh</code>, minimum 520px. Page padding 52px / 44px desktop, 36px / 24px mobile.</li>
+      <li>Planet diameter: 300–360px desktop, 180–200px mobile. Centre it on the right column, aligned to the vertical middle of the canvas.</li>
+      <li>Text column: max 44ch for the hook and facts, 68ch absolute ceiling. Left aligned, ragged right.</li>
+      <li>Clear space: at least 64px between the text column and the planet's outer glow, and 96px between content and the rail.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Live page — click any stop on the rail</h2>
+    <p class="sub">This is the spec running. Data is from the research document.</p>
+
+    <div class="stage-shell">
+      <div class="stage" id="stage" data-planet="mars" style="--pc:var(--mars)">
+        <div class="stars" aria-hidden="true"><canvas id="starfield"></canvas></div>
+
+        <div class="stage-info">
+          <p class="eyebrow"><i></i><span id="p-index">Planet 04 of 08</span></p>
+          <h2 class="planet-name" id="p-name">Mars</h2>
+          <p class="hook" id="p-hook">Rust-red, wind-scoured, and the only other place we keep sending machines to look for water.</p>
+          <ul class="stats" id="p-stats"></ul>
+          <ul class="facts" id="p-facts"></ul>
+        </div>
+
+        <div class="planet-stage">
+          <div class="orb-wrap">
+            <div class="orb" id="p-orb"></div>
+            <div class="ring"></div>
+          </div>
+        </div>
+
+        <div class="rail-zone">
+          <nav class="rail" id="rail" aria-label="Journey progress">
+            <div class="rail-line"></div>
+            <div class="rail-fill" id="railFill"></div>
+            <div class="rail-sun" title="The Sun"></div>
+          </nav>
+        </div>
+      </div>
+    </div>
+    <p class="caption">Keyboard: the stops are buttons, tab to them and press Enter. Reduced motion turns off the rotation and the rail's easing.</p>
+  </section>
+
+  <section>
+    <h2>The orbit rail</h2>
+    <p class="sub">A miniature solar system, not a progress bar. It reads as distance travelled from the Sun.</p>
+    <h3>Anatomy</h3>
+    <ul>
+      <li><b>Sun anchor</b> at the far left, 16px, always lit. It is the origin of the journey and stays fixed.</li>
+      <li><b>Orbit line</b>: 1px hairline at 14% opacity, running the full width of the content area.</li>
+      <li><b>Filled segment</b>: the line from the Sun to the current planet, drawn in the solar gradient. It is the progress.</li>
+      <li><b>Stops</b>: eight dots, spaced by a compressed (square-root) distance scale so Mercury–Mars stay legible instead of bunching at 3% of the width.</li>
+      <li><b>Dot size</b> follows the planet's real diameter, compressed the same way: Mercury 7px up to Jupiter 16px. Size carries information, so don't flatten it.</li>
+    </ul>
+    <h3>States</h3>
+    <table>
+      <tr><th>State</th><th>Opacity</th><th>Scale</th><th>Extras</th></tr>
+      <tr><td>Visited / upcoming</td><td class="num">0.42</td><td class="num">1.00</td><td>Planet colour only</td></tr>
+      <tr><td>Hover / focus</td><td class="num">0.75</td><td class="num">1.00</td><td>Label fades in above</td></tr>
+      <tr><td>Current page</td><td class="num">1.00</td><td class="num">1.55</td><td>Starlight hairline ring, soft glow in the planet's colour, label always on</td></tr>
+    </table>
+    <p style="margin-top:18px">Scale up rather than recolour: the highlight must survive on Mercury's grey as well as Neptune's blue. 1.55× is the smallest jump that reads instantly at a glance and still fits the 64px rail without shoving neighbours. Transition is 350ms on a soft ease; the fill runs 500ms so the line arrives just after the dot settles.</p>
+  </section>
+
+  <section>
+    <h2>Colour</h2>
+    <p class="sub">One dark base, one warm accent for the Sun and the journey, and a tint per planet that is only ever used on that planet's page.</p>
+    <ul class="swatches">
+      <li class="swatch"><div class="chip" style="background:#05060C"></div><div class="nm"><b>Void</b><span>#05060C · canvas</span></div></li>
+      <li class="swatch"><div class="chip" style="background:#0B0E1A"></div><div class="nm"><b>Deep</b><span>#0B0E1A · panels</span></div></li>
+      <li class="swatch"><div class="chip" style="background:#ECE7DC"></div><div class="nm"><b>Starlight</b><span>#ECE7DC · text</span></div></li>
+      <li class="swatch"><div class="chip" style="background:#8C93A8"></div><div class="nm"><b>Dust</b><span>#8C93A8 · labels</span></div></li>
+      <li class="swatch"><div class="chip" style="background:#E7A93C"></div><div class="nm"><b>Solar</b><span>#E7A93C · accent</span></div></li>
+      <li class="swatch"><div class="chip" style="background:#F2B63C"></div><div class="nm"><b>Sun</b><span>#F2B63C</span></div></li>
+    </ul>
+    <ul class="swatches" style="margin-top:14px">
+      <li class="swatch"><div class="chip" style="background:#9A8F86"></div><div class="nm"><b>Mercury</b><span>#9A8F86</span></div></li>
+      <li class="swatch"><div class="chip" style="background:#C98F4B"></div><div class="nm"><b>Venus</b><span>#C98F4B</span></div></li>
+      <li class="swatch"><div class="chip" style="background:#4E8FC4"></div><div class="nm"><b>Earth</b><span>#4E8FC4</span></div></li>
+      <li class="swatch"><div class="chip" style="background:#C05A3A"></div><div class="nm"><b>Mars</b><span>#C05A3A</span></div></li>
+      <li class="swatch"><div class="chip" style="background:#C9A177"></div><div class="nm"><b>Jupiter</b><span>#C9A177</span></div></li>
+      <li class="swatch"><div class="chip" style="background:#D8C08A"></div><div class="nm"><b>Saturn</b><span>#D8C08A</span></div></li>
+      <li class="swatch"><div class="chip" style="background:#7FBFC4"></div><div class="nm"><b>Uranus</b><span>#7FBFC4</span></div></li>
+      <li class="swatch"><div class="chip" style="background:#3F63B8"></div><div class="nm"><b>Neptune</b><span>#3F63B8</span></div></li>
+    </ul>
+    <p style="margin-top:20px">The planet tint appears in exactly four places: the orb body, its glow, the bullet marks in the fact list, and that planet's dot on the rail. Never as a background wash, never behind text.</p>
+  </section>
+
+  <section>
+    <h2>Type</h2>
+    <p class="sub">Two serifs, clearly different jobs. Bodoni Moda is engraved and high-contrast, like the lettering on an old star atlas; Spectral is built for reading on screen.</p>
+    <table>
+      <tr><th>Role</th><th>Face</th><th>Size · weight</th></tr>
+      <tr><td>Planet name</td><td>Bodoni Moda</td><td>44–68px · 400, tracking −0.015em</td></tr>
+      <tr><td>Section heading</td><td>Bodoni Moda</td><td>26–36px · 400</td></tr>
+      <tr><td>Hook</td><td>Spectral</td><td>18px · 300, max 40ch</td></tr>
+      <tr><td>Stat value</td><td>Spectral</td><td>19px · 400, tabular numerals</td></tr>
+      <tr><td>Stat label &amp; rail label</td><td>Spectral</td><td>12–13px · 300, dust grey</td></tr>
+      <tr><td>Story facts</td><td>Spectral</td><td>15px · 300, line-height 1.6</td></tr>
+    </table>
+    <p style="margin-top:18px">Sentence case everywhere, including the stop labels on the rail. Numbers always carry their unit, and units are never abbreviated past recognition — <code>4,879 km</code>, not <code>4879</code>.</p>
+  </section>
+
+  <section>
+    <h2>Motion</h2>
+    <ul>
+      <li><b>Planet rotation</b>: one slow continuous spin, 40–60s per turn. This is the only ambient motion on the page, and it is what makes the canvas feel alive.</li>
+      <li><b>Stars</b>: static field, drawn once. A faint twinkle on a handful of stars is allowed; a moving parallax field is not — it fights the planet.</li>
+      <li><b>Planet change</b>: the outgoing orb fades and shrinks to 0.92, the incoming one fades up over 450ms. The rail dot grows at the same moment so the two feel like one action.</li>
+      <li><b>Text</b>: fades in only, no slide. Staggered slide-ups on every block is the tell of a template.</li>
+      <li>Honour <code>prefers-reduced-motion</code>: drop rotation and the fill animation, keep the state change instant.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Content pattern per planet</h2>
+    <p class="sub">The research document already has more than fits on one screen. This is the filter.</p>
+    <ul>
+      <li><b>Hook</b> — one sentence, the reason this planet is worth a screen. Written, not quoted from data.</li>
+      <li><b>Four stats</b> — same four on every planet so they can be compared: distance from the Sun, diameter, day length, moons. Year length swaps in where a planet's year is the strange part (Venus, Neptune).</li>
+      <li><b>Three to five facts</b> — one on composition, one on atmosphere or surface, one on what makes it unique, one on exploration. Twelve words each where possible.</li>
+      <li>Everything else from the research — mass, gravity, axial tilt, mission histories — belongs behind a "more" disclosure or on the comparison view, not on the canvas.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Do and don't</h2>
+    <div class="rules">
+      <div>
+        <h3>Do</h3>
+        <ul>
+          <li>Keep the planet's centre at the same coordinates on every page.</li>
+          <li>Let the glow bleed into the text gutter — it sells depth.</li>
+          <li>Give the rail room; it needs 96px of empty canvas above it.</li>
+          <li>Use the real size difference between dots. Jupiter should look like Jupiter.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Don't</h3>
+        <ul>
+          <li>Put text over the planet, or a panel behind the text.</li>
+          <li>Add a second accent colour, a card, or a border-radius kit.</li>
+          <li>Animate the starfield, the text and the planet at once.</li>
+          <li>Use the rail for anything but position in the journey — no percentages, no step counter.</li>
+          <li>Shrink the current dot instead of growing it. The highlight is always the largest thing on the rail.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Accessibility floor</h2>
+    <ul>
+      <li>Starlight on void is about 15:1 — fine. Dust grey at 12px is the weakest pairing; never go below 13px with it on a coloured background.</li>
+      <li>Rail stops are <code>&lt;button&gt;</code> or links with a 44px tap target, an accessible name ("Mars, planet 4 of 8"), and <code>aria-current="page"</code> on the active one.</li>
+      <li>The highlight is carried by size, ring and label — not colour alone.</li>
+      <li>Every orb has a text alternative; decorative starfield is <code>aria-hidden</code>.</li>
+    </ul>
+  </section>
+
+  <footer class="wrap" style="padding-left:0;padding-right:0">
+    The Galactic Canvas — design guideline for Stage 4 planet pages. Planet figures from the project research compilation.
+  </footer>
+</div>
+
+<script>
+const PLANETS = [
+  {id:"mercury",name:"Mercury",dist:57.9,dia:4879,hook:"The smallest planet, closest to the Sun, and the one with the most violent swing between day and night.",
+   stats:[["Distance from Sun","57.9M km"],["Diameter","4,879 km"],["Day length","59 days"],["Moons","None"]],
+   facts:["An iron core fills about 85% of its radius.","Almost no atmosphere, so heat escapes the moment night falls.","Surface cratered like the Moon, from −173°C to 427°C.","Mapped by Mariner 10 and MESSENGER; BepiColombo is en route."]},
+  {id:"venus",name:"Venus",dist:108.2,dia:12104,hook:"Earth's twin in size and mass, and nothing like it anywhere else — hot enough at the surface to melt lead.",
+   stats:[["Distance from Sun","108.2M km"],["Diameter","12,104 km"],["Day length","243 days"],["Year length","225 days"]],
+   facts:["Atmosphere is 96% carbon dioxide under sulphuric acid cloud.","A runaway greenhouse holds the surface near 464°C.","Rotates backward, and its day outlasts its year.","Surface known only by radar — Magellan drew the map."]},
+  {id:"earth",name:"Earth",dist:149.6,dia:12742,hook:"The reference point for every other number on this journey, and the only world we know that is inhabited.",
+   stats:[["Distance from Sun","149.6M km"],["Diameter","12,742 km"],["Day length","24 hours"],["Moons","1"]],
+   facts:["Roughly 71% of the surface is liquid water.","A nitrogen–oxygen atmosphere and magnetic field shield the ground.","An unusually large Moon steadies the 23.5° tilt that gives us seasons.","Plate tectonics keep rebuilding the crust."]},
+  {id:"mars",name:"Mars",dist:227.9,dia:6779,hook:"Rust-red, wind-scoured, and the only other place we keep sending machines to look for water.",
+   stats:[["Distance from Sun","227.9M km"],["Diameter","6,779 km"],["Day length","24.6 hours"],["Moons","2"]],
+   facts:["Iron oxide dust gives the surface its colour.","A thin CO₂ atmosphere, too sparse to hold heat or liquid water.","Home to Olympus Mons and the Valles Marineris canyons.","Ancient riverbeds and polar ice hint at a wetter past."]},
+  {id:"jupiter",name:"Jupiter",dist:778.5,dia:139820,hook:"More massive than every other planet combined, and still only a failed star made of hydrogen and helium.",
+   stats:[["Distance from Sun","778.5M km"],["Diameter","139,820 km"],["Day length","9.9 hours"],["Moons","95+"]],
+   facts:["A gas giant with no true solid surface.","The Great Red Spot is a storm wider than Earth.","Strongest magnetic field of any planet, plus a faint dusty ring.","Europa likely hides an ocean beneath its ice."]},
+  {id:"saturn",name:"Saturn",dist:1434,dia:116460,hook:"The planet everyone can draw from memory — and the least dense one in the system.",
+   stats:[["Distance from Sun","1,434M km"],["Diameter","116,460 km"],["Day length","10.7 hours"],["Moons","146"]],
+   facts:["Rings are almost entirely ice with a little rock.","Light enough to float, given a big enough ocean.","A hexagonal jet stream circles the north pole.","Cassini studied it for 13 years and landed a probe on Titan."]},
+  {id:"uranus",name:"Uranus",dist:2871,dia:50724,hook:"An ice giant knocked onto its side, where each pole gets 42 years of daylight then 42 of dark.",
+   stats:[["Distance from Sun","2,871M km"],["Diameter","50,724 km"],["Day length","17.2 hours"],["Moons","27"]],
+   facts:["Water, methane and ammonia ices around a small rocky core.","Methane absorbs red light, leaving the pale blue-green.","Axial tilt of about 98° — it rolls along its orbit.","Found by William Herschel in 1781; visited once, by Voyager 2."]},
+  {id:"neptune",name:"Neptune",dist:4495,dia:49244,hook:"Found with mathematics before anyone saw it, and still the windiest place we know.",
+   stats:[["Distance from Sun","4,495M km"],["Diameter","49,244 km"],["Day length","16.1 hours"],["Year length","165 years"]],
+   facts:["Winds reach 2,100 km/h, the fastest measured on any planet.","Deep blue from methane high in the atmosphere.","Le Verrier and Adams predicted its position; Galle saw it in 1846.","Triton orbits backward and erupts nitrogen geysers."]}
+];
+
+const stage = document.getElementById("stage");
+const rail = document.getElementById("rail");
+const fill = document.getElementById("railFill");
+const orb = document.getElementById("p-orb");
+
+const compress = v => Math.sqrt(v);
+const maxD = compress(PLANETS[7].dist);
+const pos = p => 4 + (compress(p.dist) / maxD) * 92;           // % across the rail
+const dotSize = p => 6 + (Math.sqrt(p.dia) / Math.sqrt(139820)) * 10;
+
+PLANETS.forEach((p, i) => {
+  const b = document.createElement("button");
+  b.className = "stop";
+  b.style.left = pos(p) + "%";
+  b.style.setProperty("--pc", "var(--" + p.id + ")");
+  b.setAttribute("aria-label", p.name + ", planet " + (i + 1) + " of 8");
+  b.innerHTML = '<span class="tag">' + p.name + '</span><span class="dot" style="width:' +
+                dotSize(p).toFixed(1) + 'px;height:' + dotSize(p).toFixed(1) + 'px"></span>';
+  b.addEventListener("click", () => select(i));
+  rail.appendChild(b);
+});
+const stops = [...rail.querySelectorAll(".stop")];
+
+function select(i){
+  const p = PLANETS[i];
+  stage.dataset.planet = p.id;
+  stage.style.setProperty("--pc", "var(--" + p.id + ")");
+  stage.style.setProperty("--bands", ["jupiter","saturn"].includes(p.id) ? ".7" : ".3");
+  document.getElementById("p-index").textContent = "Planet 0" + (i + 1) + " of 08";
+  document.getElementById("p-name").textContent = p.name;
+  document.getElementById("p-hook").textContent = p.hook;
+  document.getElementById("p-stats").innerHTML =
+    p.stats.map(s => '<li><span class="k">' + s[0] + '</span><span class="v">' + s[1] + '</span></li>').join("");
+  document.getElementById("p-facts").innerHTML = p.facts.map(f => "<li>" + f + "</li>").join("");
+  stops.forEach((s, j) => j === i ? s.setAttribute("aria-current", "page") : s.removeAttribute("aria-current"));
+  fill.style.width = pos(p) + "%";
+  orb.style.opacity = 0; orb.style.transform = "scale(.94)";
+  requestAnimationFrame(() => {
+    orb.style.transition = "opacity .45s ease, transform .45s cubic-bezier(.22,.7,.2,1)";
+    orb.style.opacity = 1; orb.style.transform = "scale(1)";
+  });
+}
+select(3);
+
+// static starfield
+const cv = document.getElementById("starfield"), ctx = cv.getContext("2d");
+function stars(){
+  const r = cv.parentElement.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
+  cv.width = r.width * dpr; cv.height = r.height * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, r.width, r.height);
+  const n = Math.round(r.width * r.height / 5200);
+  for (let i = 0; i < n; i++){
+    const x = Math.random() * r.width, y = Math.random() * r.height;
+    const s = Math.random() < .93 ? Math.random() * .9 + .3 : Math.random() * 1.3 + 1.1;
+    ctx.globalAlpha = Math.random() * .55 + .12;
+    ctx.fillStyle = Math.random() < .12 ? "#CFE0FF" : "#FFF8EC";
+    ctx.beginPath(); ctx.arc(x, y, s, 0, 6.3); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+stars();
+let t; addEventListener("resize", () => { clearTimeout(t); t = setTimeout(stars, 200); });
+</script>
+</body>
+</html>

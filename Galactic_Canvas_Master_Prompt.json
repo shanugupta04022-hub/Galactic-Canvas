@@ -1,0 +1,511 @@
+{
+  "project": "The Galactic Canvas",
+  "tagline": "An interactive storytelling journey: Milky Way -> Solar System -> Sun -> Planets",
+  "role_instruction": "You are Gemini, acting as a senior creative front-end engineer inside Google AI Studio. Build a single, production-quality, self-contained interactive website from the specification below. Follow every field exactly. Where the spec gives numbers, colors, or copy, use them verbatim. Where it gives rules, treat them as hard constraints, not suggestions. Generate the app directly in AI Studio's build environment so it can be previewed and deployed immediately.",
+  "output_requirements": {
+    "format": "One self-contained HTML file (inline CSS + JS), OR a small React app if the target supports multiple files \u2014 but a single index.html is preferred for portability.",
+    "libraries_allowed": [
+      "Three.js (r128+ UMD build via CDN)",
+      "GSAP + GSAP ScrollTrigger (via CDN)"
+    ],
+    "no_external_assets": "Do not depend on external image files unless generated procedurally (canvas/WebGL starfields, gradients, shaders). If real planet textures are desired, use simple procedurally shaded spheres (color + noise/gradient) rather than broken image links.",
+    "responsiveness": "Must work at desktop (>=1024px) and mobile (<860px) breakpoints per the layout spec below.",
+    "accessibility": "Must meet the accessibility floor described below (keyboard nav, aria-current, reduced-motion support, contrast).",
+    "performance": "Keep the whole experience lightweight and smooth (target 60fps scroll-tied animation); avoid heavy unoptimized 3D scenes.",
+    "target_environment": "Google AI Studio build/app mode (Gemini-generated web app)."
+  },
+  "purpose_and_audience": {
+    "why": "Make astronomy engaging through visual storytelling instead of static text, turning the abstract scale of the universe into a step-by-step zoom journey from galaxy to planet.",
+    "goals": [
+      "Simplify the scale of the universe through visual, interactive design",
+      "Create an engaging, memorable learning experience rather than passive reading",
+      "Demonstrate scroll/zoom storytelling techniques used to teach science",
+      "Showcase design, animation, and research skills combined"
+    ],
+    "audience": [
+      "Students (school/college) learning astronomy",
+      "Teachers/educators wanting a visual classroom aid",
+      "Space enthusiasts and curious self-paced learners",
+      "Evaluators assessing content accuracy and interactive design",
+      "General visitors with little prior astronomy knowledge"
+    ]
+  },
+  "information_architecture": {
+    "summary": "Structurally two pages. Page 2 is not sub-pages, it is ONE continuous scroll/zoom canvas containing 11 scroll-triggered scenes plus one optional branch.",
+    "sitemap_flow": "Page 1 (Cover, Milky Way top-down) -> Scene A (Milky Way, angled) -> Scene B (Solar System, zoomed) -> Scene C (The Sun, close-up) -> Scene D..K (Mercury -> Venus -> Earth -> Mars -> Jupiter -> Saturn -> Uranus -> Neptune, in orbital order) with an optional branch from Earth into the Earth-Moon System that rejoins the main line before Mars.",
+    "tech_recommendation": "Build Page 2 as one continuous canvas using a scroll-triggered zoom approach: Three.js for the 3D scenes/planets, GSAP ScrollTrigger for pinning and reveal timing of info panels.",
+    "pages": [
+      {
+        "id": "page1_cover",
+        "name": "Page 1 \u2014 Cover",
+        "purpose": "Pure establishing shot. No data, no UI chrome. Job is to make the visitor want to scroll.",
+        "content": {
+          "visual": "Full-bleed top-down (galactic north pole) image/render of the Milky Way: spiral arms visible as a disc",
+          "title": "The Galactic Canvas",
+          "premise_line": "A journey from galaxy -> solar system -> Sun -> planets",
+          "cta": "A scroll/tap cue only. Do not add stats or data on this page."
+        },
+        "interaction": {
+          "on_load": "Slow parallax drift on the starfield; title fades in",
+          "on_scroll_or_click": "Camera begins tilting the galaxy from top-down to the 3/4 angle used in Scene A. The tilt itself IS the transition \u2014 no hard page cut."
+        }
+      },
+      {
+        "id": "scene_a_milky_way",
+        "name": "Page 2, Scene A \u2014 The Milky Way",
+        "visual": "Milky Way shown at an angle so disc and spiral arms read in 3D",
+        "content_blocks": {
+          "what_it_is": "A barred spiral galaxy",
+          "structure": "Central bulge, spiral arms, surrounding halo, disk, dark matter",
+          "scale_stats": "~100,000-120,000 light-years diameter; 100-400 billion stars; ~13.6 billion years old; disk ~1,000 light-years thick",
+          "where_we_sit": "Solar System is ~26,000 light-years from the galactic center, in the Orion Arm",
+          "motion": "Orbits the galactic center at ~828,000 km/h; one 'galactic year' is approximately 230 million years",
+          "neighborhood": "Part of the Local Group of galaxies, moving toward the Andromeda Galaxy (future collision predicted)",
+          "center": "Sagittarius A*, the supermassive black hole at the core",
+          "name_origin": "'Milky Way' from its milky band appearance in the night sky (Latin: Via Lactea)"
+        },
+        "interaction": {
+          "reveal": "Info panels pin and fade in one at a time as the user scrolls, layered over the rotating galaxy",
+          "locator": "A marker appears on the Orion Arm labeled 'you are here', which becomes the zoom target",
+          "exit": "Continued scroll pushes the camera toward that marker into Scene B"
+        }
+      },
+      {
+        "id": "scene_b_solar_system",
+        "name": "Page 2, Scene B \u2014 The Solar System",
+        "visual": "Camera arrives in the Orion Arm; the Sun and orbiting bodies resolve into view",
+        "content_blocks": {
+          "what_it_is": "The Sun and everything gravitationally bound to it",
+          "formation": "Nebular hypothesis \u2014 collapse of a giant molecular cloud, ~4.6 billion years ago",
+          "census": "8 planets, 5 recognized dwarf planets, 300+ known moons, 1,000,000+ asteroids larger than 1 km",
+          "layout": "Inner rocky planets -> asteroid belt -> outer gas/ice giants -> Kuiper Belt -> Oort Cloud",
+          "extent": "~2 light-years across to the edge of the Oort Cloud",
+          "orbital_plane": "Planets orbit in roughly the same plane (ecliptic) and direction, held by the Sun's gravity"
+        },
+        "interaction": {
+          "visual": "Schematic orbit rings fade in around the Sun as each stat resolves",
+          "exit": "Continued scroll zooms straight into the Sun at center, into Scene C"
+        }
+      },
+      {
+        "id": "scene_c_sun",
+        "name": "Page 2, Scene C \u2014 The Sun",
+        "visual": "Closest zoom of the establishing chain, before the journey fans out into eight planet scenes",
+        "content_blocks": {
+          "classification": "G-type main-sequence star \u2014 a 'yellow dwarf'",
+          "scale": "~1.39 million km diameter (109x Earth's diameter); 99.86% of the Solar System's total mass",
+          "temperature": "~5,500 degrees C surface vs ~15 million degrees C core",
+          "composition": "~73% hydrogen, ~25% helium",
+          "power_source": "Nuclear fusion \u2014 hydrogen fusing into helium",
+          "life_cycle": "~4.6 billion years old; ~10 billion year expected lifespan; will eventually become a red giant, then a white dwarf",
+          "phenomena": "Sunspots, solar flares, solar wind"
+        },
+        "interaction": {
+          "visual": "Surface/corona close-up with a subtle flare animation",
+          "branch_point": "As this scene ends, an orbital path selector or simple 'continue' cue appears, launching the planet sequence",
+          "exit": "Scroll pulls the camera outward and Mercury resolves into view"
+        }
+      },
+      {
+        "id": "planet_template",
+        "name": "Page 2, Scenes D-K \u2014 Planet template (build once, populate 8 times)",
+        "content_blocks_every_planet": {
+          "hero": "Full planet render, slow continuous rotation (40-60s per turn)",
+          "quick_stat_strip": "Distance from Sun, diameter, day length, year length, moon count (same four/five stats on every planet so they can be compared)",
+          "overview_line": "What it's made of \u2014 rocky / gas giant / ice giant",
+          "qualitative_highlight": "One-sentence 'why this planet is unique' fact, written not quoted from data",
+          "deep_dive_panel": "Atmosphere & surface temperature, notable moons, discovery date and exploring spacecraft/missions \u2014 collapsed by default behind a 'more' disclosure"
+        },
+        "interaction": {
+          "reveal": "Quick-stat strip appears first on arrival; deep-dive panel expands on continued scroll or tap/click",
+          "position_cue": "Small orbital mini-map in a corner shows which planet is currently in view",
+          "nav": "Prev/next arrows to jump directly between planets without re-scrolling the whole sequence"
+        }
+      },
+      {
+        "id": "branch_earth_moon",
+        "name": "Branch \u2014 The Earth-Moon System (optional detour)",
+        "note": "Not a stop on the main line. From the Earth scene the viewer can zoom further into the Earth-Moon pair before rejoining the main sequence at Mars. This is the deepest zoom level in the whole site.",
+        "content_blocks": {
+          "formation": "Giant impact hypothesis \u2014 ~4.5 billion years ago a Mars-sized protoplanet ('Theia') struck the young Earth at a glancing angle; debris flung into orbit coalesced into the Moon",
+          "physical_profile": "Diameter ~3,476 km (about 27% of Earth's); mass ~1.2% of Earth's; surface gravity ~1.62 m/s^2 (about 16.6% of Earth's)",
+          "orbit_and_tidal_lock": "Average distance ~384,400 km; tidally locked so the same face (~59% of the surface, counting libration) always points toward Earth",
+          "timekeeping": "~27.3-day sidereal orbit vs the ~29.5-day cycle of visible phases (new, crescent, quarter, gibbous, full) that people actually see from Earth",
+          "surface_and_environment": "No atmosphere; heavily cratered highlands alongside dark basaltic 'maria' (ancient lava plains); temperatures swing from ~130 degrees C in direct sunlight to ~-180 degrees C in shadow; permanently shadowed polar craters hold water ice",
+          "effect_on_earth": "Gravity drives ocean tides and helps stabilize Earth's axial tilt, keeping seasons regular over geologic time; the same geometry produces solar and lunar eclipses",
+          "slow_drift": "Tidal forces are pushing the Moon away from Earth by about 3.8 cm per year",
+          "exploration": "6 crewed Apollo landings (1969-1972) put 12 people on the surface; current-era missions (Artemis, Chang'e, Chandrayaan, among others) target a return, with particular interest in the ice-bearing south pole"
+        },
+        "interaction": {
+          "branch_trigger": "A distinct 'zoom into the Moon' prompt on the Earth scene, visually separate from the prev/next planet arrows, so it reads as a detour rather than the next stop",
+          "on_entry": "Camera pulls in on the Earth-Moon pair together, ideally at true relative size and distance, before easing into the Moon close-up",
+          "exit": "A clear 'back to Earth' control returns the viewer to the Earth scene, which then continues normally to Mars \u2014 the branch must never be the only way forward"
+        }
+      }
+    ]
+  },
+  "design_system": {
+    "principle": "The idea in one line: one planet, one screen, one column of text. The planet is the picture; the words sit beside it, never on top of it; the bottom rail answers the only navigation question a visitor has \u2014 'where am I in the solar system?'",
+    "four_rules": [
+      "The canvas stays quiet: deep space, faint stars, nothing that competes with the planet.",
+      "The planet owns the right side: same position and same optical size band on every planet page, so moving between planets feels like turning your head, not reloading a page.",
+      "Text is a single narrow column: hook first, numbers second, story third. Never more than one screen.",
+      "Progress is always visible: the orbit rail is the only persistent chrome on the page."
+    ],
+    "layout": {
+      "desktop": {
+        "breakpoint": ">=1024px",
+        "columns": "56% visual / 44% text-and-planet split as described",
+        "description": "Planet vertically centred and positioned right; text column at left; orbit rail pinned to the bottom across the full width.",
+        "canvas_height": "100vh, minimum 520px",
+        "page_padding": "52px vertical / 44px horizontal",
+        "planet_diameter": "300-360px, centered on the right column, vertically middle-aligned to the canvas",
+        "text_column_width": "max 44ch for hook and facts, 68ch absolute ceiling, left aligned, ragged right",
+        "clear_space": "At least 64px between the text column and the planet's outer glow; at least 96px between content and the rail"
+      },
+      "mobile": {
+        "breakpoint": "<860px",
+        "description": "Planet first (~190px), then planet name/hook/stats/facts stacked below, then the compressed orbit rail with labels only on the current stop.",
+        "page_padding": "36px vertical / 24px horizontal",
+        "planet_diameter": "180-200px"
+      },
+      "applies_to": "Stage 4 planet pages define the canvas; Stages 1-3 (Milky Way, Solar System, Sun) inherit the same canvas, type system, and rail."
+    },
+    "orbit_rail": {
+      "concept": "A miniature solar system, not a progress bar. Reads as distance travelled from the Sun.",
+      "anatomy": {
+        "sun_anchor": "Fixed at the far left, 16px, always lit \u2014 the origin of the journey",
+        "orbit_line": "1px hairline at 14% opacity, running the full width of the content area",
+        "filled_segment": "The line from the Sun to the current planet, drawn in the solar gradient \u2014 this is the progress indicator",
+        "stops": "Eight dots spaced by a compressed (square-root) distance scale so Mercury-Mars don't bunch up at 3% of the width",
+        "dot_size": "Follows the planet's real diameter, compressed the same way: Mercury 7px up to Jupiter 16px \u2014 size carries information, don't flatten it"
+      },
+      "states": [
+        {
+          "state": "visited_or_upcoming",
+          "opacity": 0.42,
+          "scale": 1.0,
+          "extras": "Planet colour only"
+        },
+        {
+          "state": "hover_or_focus",
+          "opacity": 0.75,
+          "scale": 1.0,
+          "extras": "Label fades in above"
+        },
+        {
+          "state": "current_page",
+          "opacity": 1.0,
+          "scale": 1.55,
+          "extras": "Starlight hairline ring, soft glow in the planet's colour, label always on"
+        }
+      ],
+      "rule": "Scale up rather than recolour \u2014 the highlight must survive on Mercury's grey as well as Neptune's blue. 1.55x is the smallest jump that reads instantly and still fits the 64px rail without shoving neighbours.",
+      "timing": "Transition is 350ms on a soft ease; the fill runs 500ms so the line arrives just after the dot settles."
+    },
+    "color_tokens": {
+      "void": "#05060C (canvas background)",
+      "deep": "#0B0E1A (panels)",
+      "starlight": "#ECE7DC (text)",
+      "dust": "#8C93A8 (labels)",
+      "solar": "#E7A93C (accent)",
+      "sun": "#F2B63C",
+      "mercury": "#9A8F86",
+      "venus": "#C98F4B",
+      "earth": "#4E8FC4",
+      "mars": "#C05A3A",
+      "jupiter": "#C9A177",
+      "saturn": "#D8C08A",
+      "uranus": "#7FBFC4",
+      "neptune": "#3F63B8",
+      "rule": "The planet tint appears in exactly four places: the orb body, its glow, the bullet marks in the fact list, and that planet's dot on the rail. Never as a background wash, never behind text."
+    },
+    "typography": {
+      "display_font": "Bodoni Moda (engraved, high-contrast, like lettering on an old star atlas) \u2014 Google Font, fallback Georgia/Times New Roman/serif",
+      "body_font": "Spectral (built for reading on screen) \u2014 Google Font, fallback Georgia/Times New Roman/serif",
+      "scale": [
+        {
+          "role": "Planet name",
+          "face": "Bodoni Moda",
+          "size_weight": "44-68px, weight 400, letter-spacing -0.015em"
+        },
+        {
+          "role": "Section heading",
+          "face": "Bodoni Moda",
+          "size_weight": "26-36px, weight 400"
+        },
+        {
+          "role": "Hook",
+          "face": "Spectral",
+          "size_weight": "18px, weight 300, max 40ch"
+        },
+        {
+          "role": "Stat value",
+          "face": "Spectral",
+          "size_weight": "19px, weight 400, tabular numerals"
+        },
+        {
+          "role": "Stat label & rail label",
+          "face": "Spectral",
+          "size_weight": "12-13px, weight 300, dust grey"
+        },
+        {
+          "role": "Story facts",
+          "face": "Spectral",
+          "size_weight": "15px, weight 300, line-height 1.6"
+        }
+      ],
+      "rule": "Sentence case everywhere, including rail stop labels. Numbers always carry their unit and units are never abbreviated past recognition (e.g. '4,879 km', not '4879')."
+    },
+    "motion": {
+      "planet_rotation": "One slow continuous spin, 40-60s per turn \u2014 the only ambient motion on the page, and what makes the canvas feel alive",
+      "stars": "Static field, drawn once. A faint twinkle on a handful of stars is allowed; a moving parallax field is NOT allowed on planet pages \u2014 it fights the planet.",
+      "planet_change": "Outgoing orb fades and shrinks to 0.92, incoming orb fades up over 450ms; the rail dot grows at the same moment so both read as one action",
+      "text": "Fades in only, no slide. Staggered slide-ups on every block is the tell of a template \u2014 avoid it.",
+      "reduced_motion": "Honour prefers-reduced-motion: drop rotation and the fill animation, keep state changes instant"
+    },
+    "content_pattern_per_planet": {
+      "hook": "One sentence \u2014 the reason this planet is worth a screen. Written, not quoted verbatim from data.",
+      "four_stats": "Same four stats on every planet for comparability: distance from the Sun, diameter, day length, moons. Year length swaps in where the year is the interesting/strange part (Venus, Neptune).",
+      "three_to_five_facts": "One on composition, one on atmosphere or surface, one on what makes it unique, one on exploration \u2014 about twelve words each where possible.",
+      "overflow_rule": "Everything else from the research (mass, gravity, axial tilt, full mission histories) belongs behind a 'more' disclosure or a separate comparison view, not on the main canvas."
+    },
+    "do": [
+      "Keep the planet's centre at the same coordinates on every page",
+      "Let the glow bleed into the text gutter \u2014 it sells depth",
+      "Give the rail room; it needs 96px of empty canvas above it",
+      "Use the real size difference between dots \u2014 Jupiter should look like Jupiter"
+    ],
+    "dont": [
+      "Put text over the planet, or a panel behind the text",
+      "Add a second accent colour, a card, or a border-radius kit",
+      "Animate the starfield, the text and the planet all at once",
+      "Use the rail for anything but position in the journey \u2014 no percentages, no step counter",
+      "Shrink the current dot instead of growing it \u2014 the highlight is always the largest thing on the rail"
+    ],
+    "accessibility_floor": [
+      "Starlight-on-void contrast is about 15:1 \u2014 acceptable. Dust grey at 12px is the weakest pairing; never go below 13px with it on a coloured background.",
+      "Rail stops are <button> elements or links with a 44px tap target, an accessible name (e.g. 'Mars, planet 4 of 8'), and aria-current=\"page\" on the active one",
+      "The highlight is carried by size, ring, and label \u2014 never by colour alone",
+      "Every orb/planet graphic has a text alternative; decorative starfield is aria-hidden"
+    ]
+  },
+  "content_data": {
+    "milky_way": {
+      "quantitative": {
+        "diameter": "~100,000-120,000 light-years",
+        "number_of_stars": "100-400 billion",
+        "age": "~13.6 billion years",
+        "solar_system_distance_from_center": "~26,000 light-years",
+        "disk_thickness": "~1,000 light-years",
+        "orbital_speed": "~828,000 km/h (one orbit = ~230 million years, a 'galactic year')",
+        "known_galaxies_observable_universe": "~2 trillion (estimated)"
+      },
+      "qualitative": [
+        "Classified as a barred spiral galaxy",
+        "Made of a central bulge, spiral arms, a surrounding halo, and dark matter",
+        "Contains gas, dust, and stellar nurseries where new stars form",
+        "Named 'Milky Way' from its milky band appearance in the night sky (Latin: Via Lactea)",
+        "Part of the 'Local Group' of galaxies, moving toward the Andromeda Galaxy (future collision predicted)"
+      ]
+    },
+    "solar_system": {
+      "quantitative": {
+        "age": "~4.6 billion years",
+        "number_of_planets": "8 (plus 5 recognized dwarf planets)",
+        "diameter_to_oort_cloud": "~2 light-years",
+        "known_moons": "300+ across all planets",
+        "asteroid_belt": "over 1 million asteroids larger than 1 km"
+      },
+      "qualitative": [
+        "Formed from a collapsing giant molecular cloud (nebular hypothesis)",
+        "Structure: inner rocky planets, asteroid belt, outer gas/ice giants, Kuiper Belt, Oort Cloud",
+        "Held together by the Sun's gravity",
+        "Planets orbit in roughly the same plane (ecliptic plane) and direction"
+      ]
+    },
+    "sun": {
+      "quantitative": {
+        "diameter": "~1.39 million km (109x Earth's diameter)",
+        "mass": "99.86% of the Solar System's total mass",
+        "surface_temperature": "~5,500 degrees C",
+        "core_temperature": "~15 million degrees C",
+        "age": "~4.6 billion years; expected lifespan ~10 billion years",
+        "composition": "~73% hydrogen, ~25% helium"
+      },
+      "qualitative": [
+        "Classified as a G-type main-sequence star ('yellow dwarf')",
+        "Powered by nuclear fusion (hydrogen fusing into helium)",
+        "Exhibits phenomena like sunspots, solar flares, and solar wind",
+        "Will eventually become a red giant, then a white dwarf"
+      ]
+    },
+    "planets": [
+      {
+        "name": "Mercury",
+        "distance_from_sun_million_km": 57.9,
+        "diameter_km": 4879,
+        "day_length": "59 days",
+        "year_length": "88 days",
+        "moons": 0,
+        "type": "rocky",
+        "hook": "Smallest planet; most extreme day/night temperature swing of any planet",
+        "highlight": "Smallest planet, extreme temperature swings, cratered like the Moon",
+        "composition": "Rocky terrestrial planet with a large metallic core (about 70% metal, 30% silicate rock).",
+        "atmosphere_and_temperature": "Virtually no atmosphere (only a thin exosphere); temperature swings from about -180\u00b0C at night to 430\u00b0C during the day \u2014 the most extreme swing of any planet.",
+        "notable_moons": "None.",
+        "discovery": "Known since ancient times.",
+        "exploration": "First visited by NASA's Mariner 10 (1974-75); explored in detail by MESSENGER (2011-2015); BepiColombo mission currently en route.",
+        "unique_fact": "It is the smallest and fastest-orbiting planet, heavily cratered, and experiences the most extreme temperature swings of any planet."
+      },
+      {
+        "name": "Venus",
+        "distance_from_sun_million_km": 108.2,
+        "diameter_km": 12104,
+        "day_length": "243 days",
+        "year_length": "225 days",
+        "moons": 0,
+        "type": "rocky",
+        "hook": "Hottest planet due to a runaway greenhouse effect; rotates backward",
+        "highlight": "Hottest planet due to runaway greenhouse effect, rotates backward",
+        "composition": "Rocky terrestrial planet with a thick CO2 atmosphere and clouds of sulfuric acid.",
+        "atmosphere_and_temperature": "Thick carbon dioxide atmosphere with clouds of sulfuric acid, causing a runaway greenhouse effect; surface averages about 465\u00b0C, the hottest of any planet.",
+        "notable_moons": "None.",
+        "discovery": "Known since antiquity as the 'morning/evening star'; first flown past by Mariner 2 (1962).",
+        "exploration": "Explored by the Soviet Venera program (first landing 1970), NASA's Magellan orbiter, and Japan's Akatsuki mission.",
+        "unique_fact": "It is the hottest planet despite not being closest to the Sun, and it uniquely rotates in the opposite direction to its orbit."
+      },
+      {
+        "name": "Earth",
+        "distance_from_sun_million_km": 149.6,
+        "diameter_km": 12742,
+        "day_length": "24 hrs",
+        "year_length": "365.25 days",
+        "moons": 1,
+        "type": "rocky",
+        "hook": "The only known planet with life and liquid water on the surface",
+        "highlight": "Only known planet with life, liquid water, protective atmosphere",
+        "composition": "Rocky terrestrial planet with a layered structure: core, mantle, and crust.",
+        "atmosphere_and_temperature": "Nitrogen-oxygen atmosphere; average surface temperature about 15\u00b0C; liquid water covers roughly 71% of the surface.",
+        "notable_moons": "One moon: the Moon (see Earth-Moon branch for detail).",
+        "discovery": "Our home planet \u2014 studied continuously throughout human history.",
+        "exploration": "Explored extensively via satellites, the International Space Station, and countless Earth-observation missions.",
+        "unique_fact": "It is the only known planet to support life, protected by a magnetic field that shields it from harmful solar radiation."
+      },
+      {
+        "name": "Mars",
+        "distance_from_sun_million_km": 227.9,
+        "diameter_km": 6779,
+        "day_length": "24.6 hrs",
+        "year_length": "687 days",
+        "moons": 2,
+        "type": "rocky",
+        "hook": "Iron-oxide dust gives it its red color; strong evidence of ancient water",
+        "highlight": "'Red Planet' due to iron oxide dust, evidence of ancient water, target for human exploration",
+        "composition": "Rocky terrestrial planet with an iron-oxide-rich surface, giving it a reddish color.",
+        "atmosphere_and_temperature": "Thin carbon dioxide atmosphere; average temperature around -63\u00b0C.",
+        "notable_moons": "Two small moons: Phobos and Deimos.",
+        "discovery": "Known since antiquity; first successfully flown past by Mariner 4 (1965).",
+        "exploration": "Explored by Viking landers, numerous orbiters, and rovers including Curiosity and Perseverance.",
+        "unique_fact": "Hosts the largest volcano in the Solar System (Olympus Mons) and shows strong evidence of ancient rivers and lakes."
+      },
+      {
+        "name": "Jupiter",
+        "distance_from_sun_million_km": 778.5,
+        "diameter_km": 139820,
+        "day_length": "9.9 hrs",
+        "year_length": "11.9 years",
+        "moons": 95,
+        "type": "gas giant",
+        "hook": "Largest planet; the Great Red Spot storm is bigger than Earth",
+        "highlight": "Largest planet, Great Red Spot storm, strong magnetic field",
+        "composition": "Gas giant composed mainly of hydrogen and helium, with no solid surface.",
+        "atmosphere_and_temperature": "Hydrogen/helium atmosphere featuring the Great Red Spot, a giant centuries-old storm, and distinct banded cloud patterns.",
+        "notable_moons": "95 known moons, including the four large Galilean moons: Io, Europa, Ganymede, and Callisto.",
+        "discovery": "Known since antiquity; Galileo Galilei discovered its four largest moons in 1610.",
+        "exploration": "Explored by Pioneer 10/11, Voyager 1 and 2, the Galileo orbiter, and the ongoing Juno mission.",
+        "unique_fact": "It is the largest planet, has the strongest planetary magnetic field, and even has a faint ring system."
+      },
+      {
+        "name": "Saturn",
+        "distance_from_sun_million_km": 1434,
+        "diameter_km": 116460,
+        "day_length": "10.7 hrs",
+        "year_length": "29.5 years",
+        "moons": 146,
+        "type": "gas giant",
+        "hook": "Iconic ice-and-rock ring system; the only planet less dense than water",
+        "highlight": "Iconic ring system made of ice and rock, least dense planet (would float in water)",
+        "composition": "Gas giant composed mainly of hydrogen and helium.",
+        "atmosphere_and_temperature": "Hydrogen/helium atmosphere; famous for its extensive, bright ring system made of ice and rock particles.",
+        "notable_moons": "146 known moons, notably Titan (thick atmosphere, methane lakes) and Enceladus (icy geysers).",
+        "discovery": "Known since antiquity; rings correctly identified by Christiaan Huygens in 1655 after Galileo's earlier, unclear observations.",
+        "exploration": "Explored by Pioneer 11, Voyager 1 and 2, and extensively by the Cassini-Huygens mission (2004-2017).",
+        "unique_fact": "Its iconic rings make it instantly recognizable, and it is the least dense planet in the Solar System \u2014 it would float in water."
+      },
+      {
+        "name": "Uranus",
+        "distance_from_sun_million_km": 2871,
+        "diameter_km": 50724,
+        "day_length": "17.2 hrs",
+        "year_length": "84 years",
+        "moons": 27,
+        "type": "ice giant",
+        "hook": "Rotates almost on its side (~98 degree tilt); pale blue-green from methane",
+        "highlight": "Rotates on its side (~98 degree tilt), pale blue-green from methane",
+        "composition": "Ice giant made of water, ammonia, and methane ices along with hydrogen and helium.",
+        "atmosphere_and_temperature": "Hydrogen/helium/methane atmosphere giving it a pale blue-green color; extremely cold temperatures.",
+        "notable_moons": "27 known moons, including Titania and Oberon.",
+        "discovery": "Discovered by William Herschel in 1781 \u2014 the first planet found using a telescope.",
+        "exploration": "Visited only once, by Voyager 2 during its 1986 flyby; no dedicated mission has been sent since.",
+        "unique_fact": "It rotates almost on its side, with an axial tilt of about 98\u00b0, likely the result of an ancient massive collision."
+      },
+      {
+        "name": "Neptune",
+        "distance_from_sun_million_km": 4495,
+        "diameter_km": 49244,
+        "day_length": "16.1 hrs",
+        "year_length": "165 years",
+        "moons": 14,
+        "type": "ice giant",
+        "hook": "Fastest winds in the Solar System; found by math before it was observed",
+        "highlight": "Strongest winds in the Solar System, deep blue color, discovered through mathematical prediction",
+        "composition": "Ice giant with a composition similar to Uranus: water, ammonia, and methane ices plus hydrogen and helium.",
+        "atmosphere_and_temperature": "Hydrogen/helium/methane atmosphere; home to the strongest winds in the Solar System, reaching about 2,100 km/h.",
+        "notable_moons": "14 known moons, notably Triton, which orbits in the opposite direction to Neptune's rotation.",
+        "discovery": "Discovered in 1846 by Johann Galle, based on calculations by Urbain Le Verrier predicting its position from Uranus's orbital irregularities.",
+        "exploration": "Visited only once, by Voyager 2 during its 1989 flyby; no dedicated mission has been sent since.",
+        "unique_fact": "Known for its deep blue color and for being the only planet discovered through mathematical prediction rather than direct observation."
+      }
+    ],
+    "data_freshness_note": "Moon counts (especially for Jupiter and Saturn) update occasionally as new moons are confirmed \u2014 worth a quick check closer to launch/submission for precision.",
+    "earth_moon_branch": {
+      "formation": "Giant impact hypothesis \u2014 ~4.5 billion years ago a Mars-sized protoplanet ('Theia') struck the young Earth at a glancing angle; debris flung into orbit coalesced into the Moon.",
+      "physical_profile": "Diameter ~3,476 km (about 27% of Earth's); mass ~1.2% of Earth's; surface gravity ~1.62 m/s^2 (about 16.6% of Earth's).",
+      "orbit_and_tidal_lock": "Average distance ~384,400 km; tidally locked so the same face (~59% of the surface, counting libration) always points toward Earth.",
+      "timekeeping": "~27.3-day sidereal orbit vs the ~29.5-day cycle of visible phases (new, crescent, quarter, gibbous, full) seen from Earth.",
+      "surface_and_environment": "No atmosphere; heavily cratered highlands alongside dark basaltic 'maria' (ancient lava plains); temperatures swing from ~130\u00b0C in direct sunlight to ~-180\u00b0C in shadow; permanently shadowed polar craters hold water ice.",
+      "effect_on_earth": "Gravity drives ocean tides and helps stabilize Earth's axial tilt, keeping seasons regular over geologic time; the same geometry produces solar and lunar eclipses.",
+      "slow_drift": "Tidal forces are pushing the Moon away from Earth by about 3.8 cm per year.",
+      "exploration": "6 crewed Apollo landings (1969-1972) put 12 people on the surface; current-era missions (Artemis, Chang'e, Chandrayaan, among others) target a return, with particular interest in the ice-bearing south pole."
+    },
+    "ux_research_notes": {
+      "scrollytelling_precedent": "Many space-education sites use scrollytelling \u2014 scrolling triggers animations, zooms, or transitions \u2014 paired with parallax backgrounds to create a sense of depth and movement through space.",
+      "tooling": "Three.js renders 3D scenes (rotating galaxy, planets) directly in the browser; GSAP's ScrollTrigger plugin ties animations and camera movement to scroll position for a smooth zoom-in narrative.",
+      "scale_comparison_technique": "Real astronomical distances are too vast to represent literally on screen, so use relatable comparisons (e.g. 'if the Sun were a basketball, Earth would be a peppercorn 30 meters away') or compressed, non-linear scale transitions to convey scale without making empty space feel boring."
+    }
+  },
+  "project_name_rationale": "The chosen name, 'The Galactic Canvas', reflects the site's core concept: presenting the vastness of the galaxy, the Solar System, and the planets as an unfolding visual and narrative canvas for the viewer to explore.",
+  "reference_repo": "https://github.com/shanugupta04022-hub/Milky-Way2 (existing project repo \u2014 align structure/naming with this if it already contains scaffolding; otherwise build fresh to this spec)",
+  "final_instruction": "Build the complete site now, targeting Google AI Studio's app build mode. Implement Page 1 (cover) and Page 2 (the 11-scene scroll/zoom canvas: Milky Way, Solar System, Sun, then the 8 planets in order, plus the optional Earth-Moon branch) exactly per the information architecture. Apply the design system (colors, type, orbit rail, motion, do/don't, accessibility floor) exactly as specified. Populate every stat and fact from content_data verbatim, including each planet's composition, atmosphere_and_temperature, notable_moons, discovery, exploration, and unique_fact fields for the deep-dive disclosure panel, and the earth_moon_branch and ux_research_notes fields where relevant. Do not invent data not present in this spec; where creative copy is needed (hooks, transitions), keep it consistent in tone with the qualitative highlights given. Use Three.js + GSAP ScrollTrigger via CDN, no external image assets, and confirm the result renders and scrolls correctly inside AI Studio's preview.",
+  "platform_target": {
+    "tool": "Google AI Studio (build/app mode)",
+    "instructions": [
+      "Paste this entire JSON as the system/user prompt in a new AI Studio app (Build tab).",
+      "Prefer a single-file web app output (index.html with inline CSS/JS) so AI Studio can preview it immediately; if AI Studio's app scaffold uses separate files (e.g. index.html/index.css/index.tsx for a React+Vite template), keep the same content split across those files instead of forcing everything into one.",
+      "Load Three.js and GSAP + ScrollTrigger from a CDN (e.g. cdnjs or jsdelivr) via <script> tags \u2014 do not use npm imports unless AI Studio's template requires them.",
+      "Do not reference any local/relative image files; this spec intentionally avoids external image assets so the app works with zero uploaded media (procedural starfields and shaded-sphere planets only).",
+      "After generation, use AI Studio's preview to sanity-check scroll performance and the mobile breakpoint (<860px) before exporting or deploying."
+    ]
+  }
+}

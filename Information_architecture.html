@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Galactic Canvas — Information Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #06070c;
+    --bg-raised: #0e1120;
+    --bg-card: #11142470;
+    --line: #2a2f4a;
+    --line-soft: #1a1e33;
+    --ink: #e9ebf5;
+    --ink-dim: #9aa0c0;
+    --ink-faint: #666c8f;
+    --gold: #e8b768;
+    --violet: #9c8cf2;
+    --cyan: #6fd3d3;
+    --font-display: 'Fraunces', serif;
+    --font-body: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  :root:not([data-theme="light"]) {
+    --bg: #06070c;
+    --bg-raised: #0e1120;
+    --ink: #e9ebf5;
+  }
+  :root[data-theme="dark"] {
+    --bg: #06070c;
+    --bg-raised: #0e1120;
+    --ink: #e9ebf5;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #06070c;
+      --bg-raised: #0e1120;
+      --ink: #e9ebf5;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    margin: 0;
+    line-height: 1.6;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.5) 0, transparent 100%),
+      radial-gradient(1px 1px at 70% 10%, rgba(255,255,255,.4) 0, transparent 100%),
+      radial-gradient(1.5px 1.5px at 85% 60%, rgba(255,255,255,.35) 0, transparent 100%),
+      radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,.3) 0, transparent 100%),
+      radial-gradient(1px 1px at 55% 45%, rgba(255,255,255,.4) 0, transparent 100%),
+      radial-gradient(1.5px 1.5px at 10% 65%, rgba(255,255,255,.3) 0, transparent 100%);
+    background-attachment: fixed;
+  }
+
+  .wrap { max-width: 980px; margin: 0 auto; padding: 5rem 1.75rem 8rem; }
+
+  header.hero { margin-bottom: 4.5rem; }
+  .eyebrow-line {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.02em;
+    margin-bottom: 1.4rem;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+    line-height: 1.08;
+    margin: 0 0 1.1rem;
+    letter-spacing: -0.01em;
+  }
+  h1 em { font-style: italic; color: var(--gold); font-weight: 500; }
+  .hero-sub {
+    font-size: 1.08rem;
+    color: var(--ink-dim);
+    max-width: 640px;
+    margin: 0;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.7rem;
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.005em;
+  }
+  h2 .idx { color: var(--ink-faint); font-family: var(--font-mono); font-size: 1rem; font-weight: 400; margin-right: 0.6rem; }
+
+  section.block { margin-bottom: 5rem; padding-top: 2rem; border-top: 1px solid var(--line-soft); }
+  section.block > .block-intro { color: var(--ink-dim); max-width: 680px; margin: 0 0 2rem; font-size: 0.98rem; }
+
+  /* --- sitemap diagram --- */
+  .sitemap { margin: 2.5rem 0; }
+  pre.mermaid {
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 1.5rem;
+    overflow-x: auto;
+  }
+
+  /* --- scene cards --- */
+  .scene {
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: linear-gradient(180deg, rgba(156,140,242,0.04), transparent 40%), var(--bg-raised);
+    margin-bottom: 1.75rem;
+    overflow: hidden;
+  }
+  .scene-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.3rem 1.6rem;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .scene-name { font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; }
+  .scene-tag {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--violet);
+    border: 1px solid var(--violet);
+    padding: 0.2rem 0.55rem;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .scene-body { padding: 1.5rem 1.6rem 1.7rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  @media (max-width: 680px) { .scene-body { grid-template-columns: 1fr; } }
+
+  .col-label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    margin-bottom: 0.7rem;
+  }
+  ul.content-list { margin: 0; padding-left: 1.1rem; }
+  ul.content-list li { margin-bottom: 0.55rem; font-size: 0.94rem; color: var(--ink); }
+  ul.content-list li b { color: var(--gold); font-weight: 500; }
+  ul.content-list.interaction li { color: var(--ink-dim); }
+  ul.content-list.interaction li b { color: var(--cyan); }
+
+  /* --- planet grid --- */
+  .planet-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.9rem; margin: 2rem 0; }
+  @media (max-width: 780px) { .planet-grid { grid-template-columns: repeat(2, 1fr); } }
+  .planet-chip {
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0.9rem 1rem;
+    background: var(--bg-raised);
+  }
+  .planet-chip .pname { font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; margin-bottom: 0.3rem; }
+  .planet-chip .pfact { font-size: 0.82rem; color: var(--ink-dim); }
+
+  table.stat-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.88rem; }
+  table.stat-table th, table.stat-table td { text-align: left; padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--line-soft); }
+  table.stat-table th { font-family: var(--font-mono); font-weight: 500; color: var(--ink-faint); font-size: 0.72rem; }
+  table.stat-table td { color: var(--ink); }
+
+  .template-note {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    border-left: 2px solid var(--violet);
+    padding: 0.3rem 0 0.3rem 0.9rem;
+    margin: 1.2rem 0 0;
+  }
+
+  footer.notes {
+    border-top: 1px solid var(--line-soft);
+    padding-top: 2rem;
+    font-size: 0.9rem;
+    color: var(--ink-dim);
+  }
+  footer.notes h3 { font-family: var(--font-display); font-size: 1.15rem; color: var(--ink); margin-bottom: 0.8rem; }
+  footer.notes ul { padding-left: 1.1rem; }
+  footer.notes li { margin-bottom: 0.5rem; }
+
+  code.inline { font-family: var(--font-mono); background: var(--bg-raised); padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.85em; color: var(--cyan); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow-line">the galactic canvas / information architecture</div>
+    <h1>Two pages. <em>One continuous fall</em> from galaxy to planet.</h1>
+    <p class="hero-sub">A cover page that shows the Milky Way from above, then a single long scroll/zoom page that tilts the galaxy, pulls the viewer down through the Solar System and the Sun, and lands on each of the eight planets in turn.</p>
+  </header>
+
+  <section class="block">
+    <h2><span class="idx">00</span>Sitemap</h2>
+    <p class="block-intro">Structurally the site is only two pages. Page 2 is not eight sub-pages — it's one scroll/zoom canvas containing eleven scroll-triggered scenes. Treat each box below as a "scene," not a route.</p>
+    <div class="sitemap">
+<pre class="mermaid">
+flowchart TD
+    P1["PAGE 1 — Cover&lt;br/&gt;Milky Way, top-down"]
+    P1 --> A
+
+    subgraph PAGE2 ["PAGE 2 — Scroll / Zoom Canvas"]
+        direction TB
+        A["Scene A — Milky Way&lt;br/&gt;(angled view + info)"] --> B["Scene B — Solar System&lt;br/&gt;(zoom in + info)"]
+        B --> C["Scene C — The Sun&lt;br/&gt;(zoom in + info)"]
+        C --> D1["Mercury"] --> D2["Venus"] --> D3["Earth"] --> D4["Mars"] --> D5["Jupiter"] --> D6["Saturn"] --> D7["Uranus"] --> D8["Neptune"]
+        D3 -. optional detour .-> EM["Branch — Earth&ndash;Moon System"]
+    end
+</pre>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2><span class="idx">01</span>Page 1 — Cover</h2>
+    <p class="block-intro">Pure establishing shot. No data, no UI chrome — the job of this page is to make someone want to scroll.</p>
+    <div class="scene">
+      <div class="scene-head">
+        <span class="scene-name">Milky Way, face-on</span>
+        <span class="scene-tag">static hero</span>
+      </div>
+      <div class="scene-body">
+        <div>
+          <div class="col-label">content</div>
+          <ul class="content-list">
+            <li>Full-bleed top-down image of the Milky Way (galactic north pole view — spiral arms visible as a disc)</li>
+            <li><b>Site title:</b> "The Galactic Canvas"</li>
+            <li><b>One-line premise:</b> a journey from galaxy → solar system → Sun → planets</li>
+            <li>Scroll/tap cue, nothing else — resist adding stats here</li>
+          </ul>
+        </div>
+        <div>
+          <div class="col-label">interaction</div>
+          <ul class="content-list interaction">
+            <li><b>On load:</b> slow parallax drift on the starfield, title fades in</li>
+            <li><b>On scroll or click:</b> camera begins to tilt the galaxy from top-down to the 3/4 angle used in Scene A — this tilt is the transition, not a hard page cut</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2><span class="idx">02</span>Page 2, Scene A — The Milky Way</h2>
+    <p class="block-intro">The galaxy is now shown at an angle so its disc and arms read in 3D. Info panels reveal as the user scrolls through this scene, then the camera pushes toward one spiral arm.</p>
+    <div class="scene">
+      <div class="scene-head">
+        <span class="scene-name">Milky Way, angled view</span>
+        <span class="scene-tag">scroll scene</span>
+      </div>
+      <div class="scene-body">
+        <div>
+          <div class="col-label">content blocks</div>
+          <ul class="content-list">
+            <li><b>What it is:</b> a barred spiral galaxy</li>
+            <li><b>Structure:</b> central bulge, spiral arms, surrounding halo, disk, dark matter</li>
+            <li><b>Scale stats:</b> ~100,000–120,000 ly diameter · 100–400 billion stars · ~13.6 billion years old · disk ~1,000 ly thick</li>
+            <li><b>Where we sit:</b> Solar System is ~26,000 ly from the galactic center, in the Orion Arm</li>
+            <li><b>Motion:</b> orbits the galactic center at ~828,000 km/h — one "galactic year" ≈ 230 million years</li>
+            <li><b>Neighborhood:</b> part of the Local Group, moving toward the Andromeda Galaxy</li>
+            <li><b>Center:</b> Sagittarius A*, the supermassive black hole at the core</li>
+            <li><b>Name origin:</b> "Milky Way" from its milky band in the night sky (Latin: <em>Via Lactea</em>)</li>
+          </ul>
+        </div>
+        <div>
+          <div class="col-label">interaction</div>
+          <ul class="content-list interaction">
+            <li><b>Reveal:</b> info panels pin and fade in one at a time as the user scrolls, layered over the rotating galaxy</li>
+            <li><b>Locator:</b> a marker appears on the Orion Arm labelled "you are here," which becomes the zoom target</li>
+            <li><b>Exit:</b> continued scroll pushes the camera toward that marker into Scene B</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2><span class="idx">03</span>Page 2, Scene B — The Solar System</h2>
+    <p class="block-intro">Camera has arrived in the Orion Arm; the Sun and its orbiting bodies resolve into view.</p>
+    <div class="scene">
+      <div class="scene-head">
+        <span class="scene-name">Solar System, zoomed in</span>
+        <span class="scene-tag">scroll scene</span>
+      </div>
+      <div class="scene-body">
+        <div>
+          <div class="col-label">content blocks</div>
+          <ul class="content-list">
+            <li><b>What it is:</b> the Sun and everything gravitationally bound to it</li>
+            <li><b>Formation:</b> nebular hypothesis — collapse of a giant molecular cloud, ~4.6 billion years ago</li>
+            <li><b>Census:</b> 8 planets, 5 recognized dwarf planets, 300+ known moons, 1M+ asteroids over 1 km</li>
+            <li><b>Layout:</b> inner rocky planets → asteroid belt → outer gas/ice giants → Kuiper Belt → Oort Cloud</li>
+            <li><b>Extent:</b> ~2 light-years across to the edge of the Oort Cloud</li>
+            <li><b>Orbital plane:</b> planets orbit in roughly the same plane (ecliptic) and direction, held by the Sun's gravity</li>
+          </ul>
+        </div>
+        <div>
+          <div class="col-label">interaction</div>
+          <ul class="content-list interaction">
+            <li><b>Visual:</b> schematic orbit rings fade in around the Sun as each stat resolves</li>
+            <li><b>Exit:</b> continued scroll zooms straight into the Sun at center, into Scene C</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2><span class="idx">04</span>Page 2, Scene C — The Sun</h2>
+    <p class="block-intro">Closest zoom of the "establishing" chain before the journey fans out into the eight planet scenes.</p>
+    <div class="scene">
+      <div class="scene-head">
+        <span class="scene-name">The Sun, close-up</span>
+        <span class="scene-tag">scroll scene</span>
+      </div>
+      <div class="scene-body">
+        <div>
+          <div class="col-label">content blocks</div>
+          <ul class="content-list">
+            <li><b>Classification:</b> G-type main-sequence star — a "yellow dwarf"</li>
+            <li><b>Scale:</b> ~1.39 million km diameter (109× Earth) · 99.86% of the Solar System's mass</li>
+            <li><b>Temperature:</b> ~5,500°C surface vs. ~15 million°C core</li>
+            <li><b>Composition:</b> ~73% hydrogen, ~25% helium</li>
+            <li><b>Power source:</b> nuclear fusion, hydrogen fusing into helium</li>
+            <li><b>Life cycle:</b> ~4.6 billion years old, ~10 billion year lifespan, eventually becomes a red giant then a white dwarf</li>
+            <li><b>Phenomena:</b> sunspots, solar flares, solar wind</li>
+          </ul>
+        </div>
+        <div>
+          <div class="col-label">interaction</div>
+          <ul class="content-list interaction">
+            <li><b>Visual:</b> surface/corona close-up, subtle flare animation</li>
+            <li><b>Branch point:</b> as this scene ends, an orbital path selector or simple "continue" cue appears, launching the planet sequence</li>
+            <li><b>Exit:</b> scroll pulls the camera outward and the first planet, Mercury, resolves into view</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2><span class="idx">05</span>Page 2, Scenes D–K — Planet template</h2>
+    <p class="block-intro">Same layout repeated eight times, once per planet, in orbital order. This is the pattern to build once and populate eight times.</p>
+
+    <div class="scene">
+      <div class="scene-head">
+        <span class="scene-name">Planet scene — repeatable template</span>
+        <span class="scene-tag">×8</span>
+      </div>
+      <div class="scene-body">
+        <div>
+          <div class="col-label">content blocks (every planet)</div>
+          <ul class="content-list">
+            <li><b>Hero:</b> full planet render, slow rotation</li>
+            <li><b>Quick-stat strip:</b> distance from Sun, diameter, day length, year length, moon count</li>
+            <li><b>Overview line:</b> what it's made of — rocky / gas giant / ice giant</li>
+            <li><b>Qualitative highlight:</b> the one-sentence "why this planet is unique" fact</li>
+            <li><b>Deep-dive panel:</b> atmosphere & surface temperature, notable moons, discovery date and exploring spacecraft/missions</li>
+          </ul>
+        </div>
+        <div>
+          <div class="col-label">interaction</div>
+          <ul class="content-list interaction">
+            <li><b>Reveal:</b> quick-stat strip appears first on arrival; deep-dive panel expands on continued scroll or a tap/click</li>
+            <li><b>Position cue:</b> small orbital mini-map in a corner shows which planet is currently in view</li>
+            <li><b>Nav:</b> prev/next arrows to jump directly between planets without re-scrolling the whole sequence</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <p class="template-note">Quick-stat strip source data (already researched):</p>
+    <table class="stat-table">
+      <tr><th>planet</th><th>distance (M km)</th><th>diameter (km)</th><th>day length</th><th>year length</th><th>moons</th></tr>
+      <tr><td>Mercury</td><td>57.9</td><td>4,879</td><td>59 days</td><td>88 days</td><td>0</td></tr>
+      <tr><td>Venus</td><td>108.2</td><td>12,104</td><td>243 days</td><td>225 days</td><td>0</td></tr>
+      <tr><td>Earth</td><td>149.6</td><td>12,742</td><td>24 hrs</td><td>365.25 days</td><td>1</td></tr>
+      <tr><td>Mars</td><td>227.9</td><td>6,779</td><td>24.6 hrs</td><td>687 days</td><td>2</td></tr>
+      <tr><td>Jupiter</td><td>778.5</td><td>139,820</td><td>9.9 hrs</td><td>11.9 years</td><td>95</td></tr>
+      <tr><td>Saturn</td><td>1,434</td><td>116,460</td><td>10.7 hrs</td><td>29.5 years</td><td>146</td></tr>
+      <tr><td>Uranus</td><td>2,871</td><td>50,724</td><td>17.2 hrs</td><td>84 years</td><td>27</td></tr>
+      <tr><td>Neptune</td><td>4,495</td><td>49,244</td><td>16.1 hrs</td><td>165 years</td><td>14</td></tr>
+    </table>
+
+    <p class="template-note">One-sentence hooks for the "qualitative highlight" field:</p>
+    <div class="planet-grid">
+      <div class="planet-chip"><div class="pname">Mercury</div><div class="pfact">Smallest planet; most extreme day/night temperature swing of any planet</div></div>
+      <div class="planet-chip"><div class="pname">Venus</div><div class="pfact">Hottest planet — runaway greenhouse effect; rotates backward</div></div>
+      <div class="planet-chip"><div class="pname">Earth</div><div class="pfact">Only known planet with life and liquid water on the surface</div></div>
+      <div class="planet-chip"><div class="pname">Mars</div><div class="pfact">Iron-oxide dust gives it its red color; strong evidence of ancient water</div></div>
+      <div class="planet-chip"><div class="pname">Jupiter</div><div class="pfact">Largest planet; the Great Red Spot storm is bigger than Earth</div></div>
+      <div class="planet-chip"><div class="pname">Saturn</div><div class="pfact">Iconic ice-and-rock ring system; the only planet less dense than water</div></div>
+      <div class="planet-chip"><div class="pname">Uranus</div><div class="pfact">Rotates almost on its side (~98° tilt); pale blue-green from methane</div></div>
+      <div class="planet-chip"><div class="pname">Neptune</div><div class="pfact">Fastest winds in the Solar System; found by math before it was observed</div></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2><span class="idx">06</span>Branch — The Earth–Moon System</h2>
+    <p class="block-intro">A detour, not a stop on the main line. From the Earth scene, the viewer can choose to zoom further into the Earth–Moon pair before rejoining the main sequence at Mars. This is the deepest zoom level in the whole site — a good place to slow the pacing down and let the Moon get more than a stat strip.</p>
+    <div class="scene">
+      <div class="scene-head">
+        <span class="scene-name">Earth–Moon System, close-up</span>
+        <span class="scene-tag">optional branch</span>
+      </div>
+      <div class="scene-body">
+        <div>
+          <div class="col-label">content blocks</div>
+          <ul class="content-list">
+            <li><b>Formation:</b> the giant impact hypothesis — roughly 4.5 billion years ago a Mars-sized protoplanet, nicknamed Theia, struck the young Earth at a glancing angle; debris flung into orbit coalesced into the Moon</li>
+            <li><b>Physical profile:</b> diameter ~3,476 km (about 27% of Earth's) · mass ~1.2% of Earth's · surface gravity ~1.62 m/s² (about 16.6% of Earth's)</li>
+            <li><b>Orbit & tidal lock:</b> average distance ~384,400 km; tidally locked so the same face (~59% of the surface, counting libration) always points toward Earth</li>
+            <li><b>Timekeeping:</b> ~27.3-day sidereal orbit vs. the ~29.5-day cycle of visible phases (new, crescent, quarter, gibbous, full) that people actually see from Earth</li>
+            <li><b>Surface & environment:</b> no atmosphere; heavily cratered highlands alongside dark basaltic "maria" (ancient lava plains); temperatures swing from ~130°C in direct sunlight to ~-180°C in shadow; permanently shadowed polar craters are known to hold water ice</li>
+            <li><b>Effect on Earth:</b> its gravity drives ocean tides and helps stabilize Earth's axial tilt, keeping our seasons regular over geologic time; the same geometry produces solar and lunar eclipses</li>
+            <li><b>Slow drift:</b> tidal forces are pushing the Moon away from Earth by about 3.8 cm per year</li>
+            <li><b>Exploration:</b> 6 crewed Apollo landings (1969–1972) put 12 people on the surface; current-era missions (Artemis, Chang'e, Chandrayaan, among others) are targeting a return, with particular interest in the ice-bearing south pole</li>
+          </ul>
+        </div>
+        <div>
+          <div class="col-label">interaction</div>
+          <ul class="content-list interaction">
+            <li><b>Branch trigger:</b> a distinct "zoom into the Moon" prompt on the Earth scene — visually separate from the prev/next planet arrows, so it reads as a detour rather than the next stop</li>
+            <li><b>On entry:</b> camera pulls in on the Earth–Moon pair together, ideally rendered at true relative size and distance before easing into the Moon close-up</li>
+            <li><b>Exit:</b> a clear "back to Earth" control returns the viewer to the Earth scene, which then continues normally on to Mars — the branch should never be the only way forward</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="notes">
+    <h3>Notes carried over from the research doc</h3>
+    <ul>
+      <li>Treat Page 2 as one continuous canvas built with a scroll-triggered zoom library — the research already flags <code class="inline">Three.js</code> for the 3D scenes and <code class="inline">GSAP ScrollTrigger</code> for pinning/reveal timing.</li>
+      <li>Moon counts for Jupiter and Saturn move as new moons get confirmed — worth a quick recheck close to launch.</li>
+      <li>Keep each planet's deep-dive panel collapsed by default; the quick-stat strip alone should be enough for someone who's only skimming.</li>
+      <li>The Earth–Moon branch pattern above (optional detour, dashed line in the sitemap) is reusable — worth considering for other stand-out moons like Jupiter's Europa or Saturn's Titan if the project has room.</li>
+      <li>The dwarf planets and Kuiper Belt/Oort Cloud are still only mentioned as context in Scene B and don't have their own scenes — flag if you want those added too, likely as a similar detour off the Neptune scene.</li>
+    </ul>
+  </footer>
+
+</div>
+</body>
+</html>

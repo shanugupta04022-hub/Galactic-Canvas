@@ -1,0 +1,8 @@
+{
+  "name": "The Galactic Canvas",
+  "description": "An interactive storytelling journey from the Milky Way to the Solar System, Sun, and planets.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Galactic Canvas</title>
+  <meta name="description" content="An interactive storytelling journey from the Milky Way to the Solar System, Sun, and planets.">
+  <meta property="og:title" content="The Galactic Canvas">
+  <meta property="og:description" content="An interactive storytelling journey: Milky Way -> Solar System -> Sun -> Planets.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Three.js and GSAP via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  
+  <style>
+    :root {
+      --void: #05060C;
+      --deep: #0B0E1A;
+      --starlight: #ECE7DC;
+      --dust: #8C93A8;
+      --solar: #E7A93C;
+      --sun: #F2B63C;
+      --hair: rgba(236, 231, 220, 0.14);
+      --hair-bright: rgba(236, 231, 220, 0.28);
+      
+      --mercury: #9A8F86;
+      --venus: #C98F4B;
+      --earth: #4E8FC4;
+      --mars: #C05A3A;
+      --jupiter: #C9A177;
+      --saturn: #D8C08A;
+      --uranus: #7FBFC4;
+      --neptune: #3F63B8;
+
+      --display: "Bodoni Moda", Georgia, "Times New Roman", serif;
+      --body: "Spectral", Georgia, "Times New Roman", serif;
+      
+      --current-accent: var(--solar);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: var(--void);
+      color: var(--starlight);
+      font-family: var(--body);
+      font-weight: 300;
+      font-size: 16px;
+      line-height: 1.65;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* WebGL Canvas Viewport */
+    #webgl-viewport {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* App Container */
+    #app-container {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation / Brand Bar */
+    header.site-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 50;
+      padding: 24px 44px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: auto;
+      background: linear-gradient(180deg, rgba(5,6,12,0.85) 0%, rgba(5,6,12,0) 100%);
+    }
+
+    .brand-mark {
+      font-family: var(--display);
+      font-size: 18px;
+      letter-spacing: 0.05em;
+      color: var(--starlight);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--solar);
+      box-shadow: 0 0 10px var(--solar);
+    }
+
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .doc-link {
+      font-size: 13px;
+      color: var(--dust);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      padding: 6px 14px;
+      border-radius: 100px;
+      border: 1px solid var(--hair);
+      transition: all 0.25s ease;
+      background: rgba(11, 14, 26, 0.4);
+    }
+
+    .doc-link:hover {
+      color: var(--starlight);
+      border-color: var(--hair-bright);
+      background: rgba(11, 14, 26, 0.8);
+    }
+
+    .audio-toggle {
+      background: none;
+      border: 1px solid var(--hair);
+      color: var(--dust);
+      padding: 6px 14px;
+      border-radius: 100px;
+      cursor: pointer;
+      font-family: var(--body);
+      font-size: 13px;
+      transition: all 0.25s ease;
+    }
+    .audio-toggle:hover {
+      color: var(--starlight);
+      border-color: var(--hair-bright);
+    }
+    .audio-toggle.active {
+      color: var(--solar);
+      border-color: var(--solar);
+    }
+
+    /* Page 1: Cover */
+    #page-cover {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 100px 44px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      position: relative;
+    }
+
+    .cover-content {
+      max-width: 68ch;
+      pointer-events: auto;
+      animation: fadeIn 1.2s ease forwards;
+    }
+
+    .cover-title {
+      font-family: var(--display);
+      font-size: clamp(48px, 7vw, 92px);
+      font-weight: 400;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 24px;
+      color: var(--starlight);
+    }
+
+    .cover-premise {
+      font-family: var(--body);
+      font-size: clamp(20px, 2.5vw, 28px);
+      font-weight: 300;
+      line-height: 1.4;
+      color: var(--dust);
+      margin-bottom: 48px;
+    }
+
+    .cover-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 36px;
+      background: rgba(231, 169, 60, 0.08);
+      border: 1px solid var(--solar);
+      color: var(--solar);
+      font-family: var(--body);
+      font-size: 16px;
+      letter-spacing: 0.04em;
+      text-decoration: none;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .cover-cta:hover {
+      background: var(--solar);
+      color: var(--void);
+      box-shadow: 0 0 24px rgba(231, 169, 60, 0.45);
+    }
+
+    .cover-cta svg {
+      width: 18px;
+      height: 18px;
+      transition: transform 0.3s ease;
+    }
+
+    .cover-cta:hover svg {
+      transform: translateY(3px);
+    }
+
+    /* Page 2: Continuous Journey Sections */
+    .journey-section {
+      min-height: 100vh;
+      width: 100%;
+      padding: 100px 44px 130px;
+      display: flex;
+      align-items: center;
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    .content-wrapper {
+      width: 100%;
+      max-width: 1240px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 44% 56%;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .text-column {
+      max-width: 58ch;
+      pointer-events: auto;
+      z-index: 20;
+    }
+
+    .scene-badge {
+      display: inline-block;
+      font-family: var(--body);
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--dust);
+      margin-bottom: 12px;
+    }
+
+    .scene-title {
+      font-family: var(--display);
+      font-size: clamp(38px, 4.8vw, 68px);
+      font-weight: 400;
+      letter-spacing: -0.015em;
+      line-height: 1.1;
+      margin-bottom: 18px;
+      color: var(--starlight);
+    }
+
+    .scene-hook {
+      font-family: var(--body);
+      font-size: 19px;
+      font-weight: 300;
+      color: var(--starlight);
+      opacity: 0.92;
+      line-height: 1.55;
+      margin-bottom: 32px;
+      max-width: 46ch;
+    }
+
+    /* Stats Grid */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px 24px;
+      margin-bottom: 36px;
+      padding: 20px 0;
+      border-top: 1px solid var(--hair);
+      border-bottom: 1px solid var(--hair);
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--dust);
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-family: var(--body);
+      font-size: 19px;
+      font-weight: 400;
+      font-variant-numeric: tabular-nums;
+      color: var(--starlight);
+    }
+
+    /* Fact bullets */
+    .facts-list {
+      list-style: none;
+      margin-bottom: 36px;
+    }
+
+    .fact-item {
+      position: relative;
+      padding-left: 20px;
+      margin-bottom: 12px;
+      font-size: 15px;
+      font-weight: 300;
+      line-height: 1.6;
+      color: rgba(236, 231, 220, 0.88);
+    }
+
+    .fact-item::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background-color: var(--current-accent);
+      box-shadow: 0 0 6px var(--current-accent);
+    }
+
+    /* Planet Nav Controls (Prev / Next & Branch) */
+    .action-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: rgba(11, 14, 26, 0.6);
+      border: 1px solid var(--hair);
+      color: var(--starlight);
+      font-family: var(--body);
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .nav-btn:hover {
+      border-color: var(--current-accent);
+      color: var(--current-accent);
+      background: rgba(11, 14, 26, 0.9);
+    }
+
+    .branch-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      background: rgba(78, 143, 196, 0.12);
+      border: 1px solid var(--earth);
+      color: var(--starlight);
+      font-family: var(--body);
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .branch-btn:hover {
+      background: var(--earth);
+      color: var(--void);
+      box-shadow: 0 0 16px rgba(78, 143, 196, 0.4);
+    }
+
+    .deep-dive-toggle {
+      background: none;
+      border: none;
+      color: var(--dust);
+      font-family: var(--body);
+      font-size: 14px;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      cursor: pointer;
+      margin-top: 16px;
+      display: inline-block;
+      transition: color 0.2s ease;
+    }
+
+    .deep-dive-toggle:hover {
+      color: var(--starlight);
+    }
+
+    /* Collapsible Deep Dive Panel */
+    .deep-dive-panel {
+      margin-top: 24px;
+      padding: 24px;
+      background: var(--deep);
+      border-left: 2px solid var(--current-accent);
+      border-radius: 0 8px 8px 0;
+      display: none;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    .deep-dive-panel.open {
+      display: block;
+    }
+
+    .deep-dive-heading {
+      font-family: var(--display);
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: var(--starlight);
+    }
+
+    .deep-dive-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      font-size: 14px;
+    }
+
+    .deep-dive-field strong {
+      color: var(--dust);
+      font-weight: 400;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    /* Visual 3D Anchor Slot */
+    .visual-slot {
+      height: 100%;
+      min-height: 480px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Fixed Orbit Rail Navigation */
+    #orbit-rail-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 76px;
+      z-index: 100;
+      background: linear-gradient(0deg, rgba(5,6,12,0.96) 0%, rgba(5,6,12,0.8) 60%, rgba(5,6,12,0) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 44px;
+      pointer-events: auto;
+    }
+
+    .orbit-rail {
+      width: 100%;
+      max-width: 1100px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      height: 44px;
+    }
+
+    /* Sun origin */
+    .sun-anchor {
+      position: absolute;
+      left: 0;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: var(--sun);
+      box-shadow: 0 0 14px var(--sun);
+      cursor: pointer;
+      border: none;
+      z-index: 5;
+    }
+
+    /* Hairline background track */
+    .rail-track {
+      position: absolute;
+      left: 16px;
+      right: 0;
+      height: 1px;
+      background: var(--hair);
+    }
+
+    /* Active progress fill */
+    .rail-progress-fill {
+      position: absolute;
+      left: 16px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--sun) 0%, var(--current-accent) 100%);
+      width: 0%;
+      transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 0 8px var(--current-accent);
+    }
+
+    /* Planet stops */
+    .rail-stops {
+      position: absolute;
+      left: 16px;
+      right: 0;
+      height: 100%;
+      display: flex;
+      align-items: center;
+    }
+
+    .rail-stop-btn {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      top: 50%;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      outline: none;
+      z-index: 10;
+      width: 44px;
+      height: 44px;
+      justify-content: center;
+    }
+
+    .stop-dot {
+      border-radius: 50%;
+      transition: transform 0.35s ease, opacity 0.35s ease, box-shadow 0.35s ease;
+      opacity: 0.42;
+    }
+
+    .rail-stop-btn:hover .stop-dot,
+    .rail-stop-btn:focus .stop-dot {
+      opacity: 0.85;
+      transform: scale(1.2);
+    }
+
+    .rail-stop-btn[aria-current="page"] .stop-dot {
+      opacity: 1;
+      transform: scale(1.55);
+      box-shadow: 0 0 12px var(--current-accent), 0 0 0 1px var(--starlight);
+    }
+
+    .stop-label {
+      position: absolute;
+      bottom: 34px;
+      font-size: 11px;
+      color: var(--dust);
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      transform: translateY(4px);
+    }
+
+    .rail-stop-btn:hover .stop-label,
+    .rail-stop-btn:focus .stop-label,
+    .rail-stop-btn[aria-current="page"] .stop-label {
+      opacity: 1;
+      color: var(--starlight);
+      transform: translateY(0);
+    }
+
+    /* Modal / Detour View for Earth-Moon Branch */
+    #moon-detour-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(5, 6, 12, 0.94);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+    }
+
+    #moon-detour-modal.open {
+      display: flex;
+    }
+
+    .detour-card {
+      background: var(--deep);
+      border: 1px solid var(--hair-bright);
+      max-width: 860px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 44px;
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .close-detour {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      background: none;
+      border: 1px solid var(--hair);
+      color: var(--starlight);
+      font-size: 20px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .close-detour:hover {
+      border-color: var(--starlight);
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* Responsive Rules */
+    @media (max-width: 1023px) {
+      .content-wrapper {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      .visual-slot {
+        min-height: 280px;
+        order: -1;
+      }
+      header.site-header {
+        padding: 16px 24px;
+      }
+      .journey-section {
+        padding: 80px 24px 110px;
+      }
+      .stats-strip {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- WebGL 3D Canvas -->
+  <div id="webgl-viewport"></div>
+
+  <!-- Main Application Wrapper -->
+  <div id="app-container">
+
+    <!-- Header Navigation -->
+    <header class="site-header" id="site-header">
+      <a href="#page-cover" class="brand-mark" id="brand-link">
+        <span class="brand-dot"></span>
+        <span>The Galactic Canvas</span>
+      </a>
+      <div class="header-links">
+        <button class="audio-toggle" id="audio-toggle" title="Toggle gentle ambient synthesizer">Sound: Off</button>
+        <a href="/Information_architecture.html" class="doc-link" target="_blank" rel="noopener">Information Architecture</a>
+        <a href="/galactic-canvas-design-guideline.html" class="doc-link" target="_blank" rel="noopener">Design Guidelines</a>
+      </div>
+    </header>
+
+    <!-- Page 1: Cover Establishing Shot -->
+    <section id="page-cover" class="journey-section">
+      <div class="cover-content">
+        <span class="scene-badge">Stage 1 &middot; Deep Space Establishing Shot</span>
+        <h1 class="cover-title">The Galactic Canvas</h1>
+        <p class="cover-premise">An interactive storytelling journey from galaxy &rarr; solar system &rarr; Sun &rarr; planets</p>
+        <button class="cover-cta" id="start-journey-btn">
+          <span>Begin Journey</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <polyline points="19 12 12 19 5 12"></polyline>
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- Page 2: Scene A — The Milky Way -->
+    <section id="scene-milky-way" class="journey-section" data-scene="milky_way">
+      <div class="content-wrapper">
+        <div class="text-column">
+          <span class="scene-badge">Stage 2 &middot; Scene A</span>
+          <h2 class="scene-title">The Milky Way</h2>
+          <p class="scene-hook">A barred spiral galaxy containing hundreds of billions of stars, rotating silently in the Local Group.</p>
+          
+          <div class="stats-strip">
+            <div class="stat-item">
+              <span class="stat-label">Diameter</span>
+              <span class="stat-value">~100,000&ndash;120,000 ly</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Estimated Stars</span>
+              <span class="stat-value">100&ndash;400 billion</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Age</span>
+              <span class="stat-value">~13.6 billion years</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Our Position</span>
+              <span class="stat-value">~26,000 ly from core</span>
+            </div>
+          </div>
+
+          <ul class="facts-list">
+            <li class="fact-item">Classified as a barred spiral galaxy with a dense central bulge, spiral arms, halo, and dark matter.</li>
+            <li class="fact-item">Our Solar System sits in the Orion Arm, orbiting the galactic center at approximately 828,000 km/h.</li>
+            <li class="fact-item">One complete orbit around the core takes ~230 million Earth years — known as a "galactic year".</li>
+            <li class="fact-item">Anchored by Sagittarius A*, a supermassive black hole with a mass 4 million times that of our Sun.</li>
+          </ul>
+
+          <div class="action-row">
+            <button class="nav-btn" onclick="scrollToScene('scene-solar-system')">
+              Next: The Solar System &rarr;
+            </button>
+          </div>
+        </div>
+        <div class="visual-slot" id="slot-milky-way"></div>
+      </div>
+    </section>
+
+    <!-- Page 2: Scene B — The Solar System -->
+    <section id="scene-solar-system" class="journey-section" data-scene="solar_system">
+      <div class="content-wrapper">
+        <div class="text-column">
+          <span class="scene-badge">Stage 2 &middot; Scene B</span>
+          <h2 class="scene-title">The Solar System</h2>
+          <p class="scene-hook">Formed from the gravitational collapse of a giant molecular cloud 4.6 billion years ago.</p>
+          
+          <div class="stats-strip">
+            <div class="stat-item">
+              <span class="stat-label">Age</span>
+              <span class="stat-value">~4.6 billion years</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Major Planets</span>
+              <span class="stat-value">8 planets (+5 dwarf)</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Known Moons</span>
+              <span class="stat-value">300+ moons</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Extent</span>
+              <span class="stat-value">~2 ly to Oort Cloud</span>
+            </div>
+          </div>
+
+          <ul class="facts-list">
+            <li class="fact-item">Concentric architecture: inner rocky terrestrial worlds, asteroid belt, gas & ice giants, Kuiper Belt, and Oort Cloud.</li>
+            <li class="fact-item">All eight planets orbit in roughly the same flat plane (the ecliptic) in the same direction, bound by the Sun.</li>
+            <li class="fact-item">Over 1,000,000 asteroids larger than 1 km populate the main belt between Mars and Jupiter.</li>
+          </ul>
+
+          <div class="action-row">
+            <button class="nav-btn" onclick="scrollToScene('scene-milky-way')">&larr; Back</button>
+            <button class="nav-btn" onclick="scrollToScene('scene-sun')">Next: The Sun &rarr;</button>
+          </div>
+        </div>
+        <div class="visual-slot" id="slot-solar-system"></div>
+      </div>
+    </section>
+
+    <!-- Page 2: Scene C — The Sun -->
+    <section id="scene-sun" class="journey-section" data-scene="sun">
+      <div class="content-wrapper">
+        <div class="text-column">
+          <span class="scene-badge">Stage 3 &middot; Scene C</span>
+          <h2 class="scene-title">The Sun</h2>
+          <p class="scene-hook">A yellow dwarf star holding 99.86% of the Solar System's total mass, fueling planetary life through nuclear fusion.</p>
+          
+          <div class="stats-strip">
+            <div class="stat-item">
+              <span class="stat-label">Diameter</span>
+              <span class="stat-value">~1.39M km (109&times; Earth)</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Surface Temp</span>
+              <span class="stat-value">~5,500&deg;C</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Core Temp</span>
+              <span class="stat-value">~15 million&deg;C</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Composition</span>
+              <span class="stat-value">73% H &middot; 25% He</span>
+            </div>
+          </div>
+
+          <ul class="facts-list">
+            <li class="fact-item">G-type main-sequence star converting 600 million tons of hydrogen into helium every second via core fusion.</li>
+            <li class="fact-item">Dynamic dynamo generating intense magnetic loops, sunspots, coronal mass ejections, and the solar wind.</li>
+            <li class="fact-item">Halfway through its 10-billion-year lifespan; will eventually swell into a red giant before collapsing to a white dwarf.</li>
+          </ul>
+
+          <div class="action-row">
+            <button class="nav-btn" onclick="scrollToScene('scene-solar-system')">&larr; Back</button>
+            <button class="nav-btn" onclick="scrollToScene('planet-mercury')" style="border-color: var(--solar); color: var(--solar);">Enter Planetary Sequence &rarr;</button>
+          </div>
+        </div>
+        <div class="visual-slot" id="slot-sun"></div>
+      </div>
+    </section>
+
+    <!-- Scenes D-K: 8 Planets in Orbital Order -->
+    <div id="planets-sequence">
+      <!-- Generated dynamically from Master Prompt data -->
+    </div>
+
+  </div>
+
+  <!-- Fixed Bottom Orbit Rail -->
+  <footer id="orbit-rail-container">
+    <div class="orbit-rail">
+      <button class="sun-anchor" id="rail-sun-btn" onclick="scrollToScene('scene-sun')" title="The Sun (Origin)" aria-label="The Sun"></button>
+      <div class="rail-track"></div>
+      <div class="rail-progress-fill" id="rail-progress"></div>
+      <div class="rail-stops" id="rail-stops">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+  </footer>
+
+  <!-- Optional Earth-Moon Detour Modal -->
+  <div id="moon-detour-modal">
+    <div class="detour-card">
+      <button class="close-detour" id="close-moon-detour" aria-label="Close Earth-Moon Detour">&times;</button>
+      <span class="scene-badge" style="color: var(--earth);">Detour &middot; Deepest Zoom Level</span>
+      <h2 class="scene-title" style="margin-bottom: 12px;">The Earth-Moon System</h2>
+      <p class="scene-hook" style="max-width: 100%;">A uniquely balanced double-world stabilized by tidal resonance, mutual gravity, and deep geologic history.</p>
+      
+      <div class="stats-strip">
+        <div class="stat-item">
+          <span class="stat-label">Moon Diameter</span>
+          <span class="stat-value">~3,476 km (27% Earth)</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Average Distance</span>
+          <span class="stat-value">~384,400 km</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Surface Gravity</span>
+          <span class="stat-value">1.62 m/s&sup2; (16.6% Earth)</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Orbital Cycle</span>
+          <span class="stat-value">27.3d orbit / 29.5d phase</span>
+        </div>
+      </div>
+
+      <div class="deep-dive-grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="deep-dive-field">
+          <strong>Giant Impact Formation</strong>
+          Formed ~4.5 billion years ago when a Mars-sized protoplanet ('Theia') struck young Earth at a glancing angle; debris coalesced in orbit into the Moon.
+        </div>
+        <div class="deep-dive-field">
+          <strong>Tidal Locking & Libration</strong>
+          Tidally locked so the same lunar hemisphere (~59% visible accounting for orbital libration) permanently faces Earth.
+        </div>
+        <div class="deep-dive-field">
+          <strong>Surface & Polar Water Ice</strong>
+          Airless, cratered highlands alongside basaltic maria; surface temperatures swing from 130&deg;C in sunlight to -180&deg;C in shadow, harboring permanent water ice in polar craters.
+        </div>
+        <div class="deep-dive-field">
+          <strong>Planetary Stabilization</strong>
+          Lunar gravity stabilizes Earth's axial tilt (~23.5&deg;), preventing chaotic climate shifts over millions of years and driving marine tides.
+        </div>
+        <div class="deep-dive-field">
+          <strong>Secular Tidal Drift</strong>
+          Tidal friction pushes the Moon outward from Earth by approximately 3.8 cm every year.
+        </div>
+        <div class="deep-dive-field">
+          <strong>Human Exploration</strong>
+          12 humans walked on the Moon during NASA's Apollo program (1969&ndash;1972). Active international initiatives (Artemis, Chang'e, Chandrayaan) now target the resource-rich south pole.
+        </div>
+      </div>
+
+      <div style="margin-top: 32px; display: flex; justify-content: flex-end;">
+        <button class="nav-btn" onclick="closeMoonDetour()" style="border-color: var(--earth); color: var(--earth);">
+          &larr; Return to Earth Scene
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic & Three.js 3D Engine -->
+  <script>
+    // Master Planet Data from Specification
+    const PLANET_DATA = [
+      {
+        id: "planet-mercury",
+        name: "Mercury",
+        color: "#9A8F86",
+        distance: "57.9M km",
+        diameter: "4,879 km",
+        dayLength: "59 days",
+        yearLength: "88 days",
+        moons: 0,
+        type: "Rocky",
+        hook: "Smallest planet; most extreme day/night temperature swing of any planet.",
+        highlight: "Smallest planet, extreme temperature swings, cratered like the Moon",
+        composition: "Rocky terrestrial planet with a large metallic core (about 70% metal, 30% silicate rock).",
+        atmosphere: "Virtually no atmosphere (only a thin exosphere); temperature swings from about -180°C at night to 430°C during the day — the most extreme swing of any planet.",
+        notableMoons: "None.",
+        discovery: "Known since ancient times.",
+        exploration: "First visited by NASA's Mariner 10 (1974-75); explored in detail by MESSENGER (2011-2015); BepiColombo mission currently en route.",
+        uniqueFact: "It is the smallest and fastest-orbiting planet, heavily cratered, and experiences the most extreme temperature swings of any planet.",
+        texture: "Mercury.jpg"
+      },
+      {
+        id: "planet-venus",
+        name: "Venus",
+        color: "#C98F4B",
+        distance: "108.2M km",
+        diameter: "12,104 km",
+        dayLength: "243 days",
+        yearLength: "225 days",
+        moons: 0,
+        type: "Rocky",
+        hook: "Hottest planet due to a runaway greenhouse effect; rotates backward.",
+        highlight: "Hottest planet due to runaway greenhouse effect, rotates backward",
+        composition: "Rocky terrestrial planet with a thick CO2 atmosphere and clouds of sulfuric acid.",
+        atmosphere: "Thick carbon dioxide atmosphere with clouds of sulfuric acid, causing a runaway greenhouse effect; surface averages about 465°C, the hottest of any planet.",
+        notableMoons: "None.",
+        discovery: "Known since antiquity as the 'morning/evening star'; first flown past by Mariner 2 (1962).",
+        exploration: "Explored by the Soviet Venera program (first landing 1970), NASA's Magellan orbiter, and Japan's Akatsuki mission.",
+        uniqueFact: "It is the hottest planet despite not being closest to the Sun, and it uniquely rotates in the opposite direction to its orbit.",
+        texture: "Venus.jpg"
+      },
+      {
+        id: "planet-earth",
+        name: "Earth",
+        color: "#4E8FC4",
+        distance: "149.6M km",
+        diameter: "12,742 km",
+        dayLength: "24 hrs",
+        yearLength: "365.25 days",
+        moons: 1,
+        type: "Rocky",
+        hook: "The only known planet with life and liquid water on the surface.",
+        highlight: "Only known planet with life, liquid water, protective atmosphere",
+        composition: "Rocky terrestrial planet with a layered structure: core, mantle, and crust.",
+        atmosphere: "Nitrogen-oxygen atmosphere; average surface temperature about 15°C; liquid water covers roughly 71% of the surface.",
+        notableMoons: "One moon: the Moon (see Earth-Moon branch for detail).",
+        discovery: "Our home planet — studied continuously throughout human history.",
+        exploration: "Explored extensively via satellites, the International Space Station, and countless Earth-observation missions.",
+        uniqueFact: "It is the only known planet to support life, protected by a magnetic field that shields it from harmful solar radiation.",
+        texture: "Earth.jpg",
+        hasDetour: true
+      },
+      {
+        id: "planet-mars",
+        name: "Mars",
+        color: "#C05A3A",
+        distance: "227.9M km",
+        diameter: "6,779 km",
+        dayLength: "24.6 hrs",
+        yearLength: "687 days",
+        moons: 2,
+        type: "Rocky",
+        hook: "Iron-oxide dust gives it its red color; strong evidence of ancient water.",
+        highlight: "'Red Planet' due to iron oxide dust, evidence of ancient water, target for human exploration",
+        composition: "Rocky terrestrial planet with an iron-oxide-rich surface, giving it a reddish color.",
+        atmosphere: "Thin carbon dioxide atmosphere; average temperature around -63°C.",
+        notableMoons: "Two small moons: Phobos and Deimos.",
+        discovery: "Known since antiquity; first successfully flown past by Mariner 4 (1965).",
+        exploration: "Explored by Viking landers, numerous orbiters, and rovers including Curiosity and Perseverance.",
+        uniqueFact: "Hosts the largest volcano in the Solar System (Olympus Mons) and shows strong evidence of ancient rivers and lakes.",
+        texture: "Mars1.jpg"
+      },
+      {
+        id: "planet-jupiter",
+        name: "Jupiter",
+        color: "#C9A177",
+        distance: "778.5M km",
+        diameter: "139,820 km",
+        dayLength: "9.9 hrs",
+        yearLength: "11.9 yrs",
+        moons: 95,
+        type: "Gas Giant",
+        hook: "Largest planet; the Great Red Spot storm is bigger than Earth.",
+        highlight: "Largest planet, Great Red Spot storm, strong magnetic field",
+        composition: "Gas giant composed mainly of hydrogen and helium, with no solid surface.",
+        atmosphere: "Hydrogen/helium atmosphere featuring the Great Red Spot, a giant centuries-old storm, and distinct banded cloud patterns.",
+        notableMoons: "95 known moons, including the four large Galilean moons: Io, Europa, Ganymede, and Callisto.",
+        discovery: "Known since antiquity; Galileo Galilei discovered its four largest moons in 1610.",
+        exploration: "Explored by Pioneer 10/11, Voyager 1 and 2, the Galileo orbiter, and the ongoing Juno mission.",
+        uniqueFact: "It is the largest planet, has the strongest planetary magnetic field, and even has a faint ring system.",
+        texture: "jupiter1.jpg"
+      },
+      {
+        id: "planet-saturn",
+        name: "Saturn",
+        color: "#D8C08A",
+        distance: "1,434M km",
+        diameter: "116,460 km",
+        dayLength: "10.7 hrs",
+        yearLength: "29.5 yrs",
+        moons: 146,
+        type: "Gas Giant",
+        hook: "Iconic ice-and-rock ring system; the only planet less dense than water.",
+        highlight: "Iconic ring system made of ice and rock, least dense planet (would float in water)",
+        composition: "Gas giant composed mainly of hydrogen and helium.",
+        atmosphere: "Hydrogen/helium atmosphere; famous for its extensive, bright ring system made of ice and rock particles.",
+        notableMoons: "146 known moons, notably Titan (thick atmosphere, methane lakes) and Enceladus (icy geysers).",
+        discovery: "Known since antiquity; rings correctly identified by Christiaan Huygens in 1655 after Galileo's earlier observations.",
+        exploration: "Explored by Pioneer 11, Voyager 1 and 2, and extensively by the Cassini-Huygens mission (2004-2017).",
+        uniqueFact: "Its iconic rings make it instantly recognizable, and it is the least dense planet in the Solar System — it would float in water.",
+        texture: "Saturn1.jpg",
+        hasRings: true
+      },
+      {
+        id: "planet-uranus",
+        name: "Uranus",
+        color: "#7FBFC4",
+        distance: "2,871M km",
+        diameter: "50,724 km",
+        dayLength: "17.2 hrs",
+        yearLength: "84 yrs",
+        moons: 27,
+        type: "Ice Giant",
+        hook: "Rotates almost on its side (~98° tilt); pale blue-green from methane.",
+        highlight: "Rotates on its side (~98° tilt), pale blue-green from methane",
+        composition: "Ice giant made of water, ammonia, and methane ices along with hydrogen and helium.",
+        atmosphere: "Hydrogen/helium/methane atmosphere giving it a pale blue-green color; extremely cold temperatures.",
+        notableMoons: "27 known moons, including Titania and Oberon.",
+        discovery: "Discovered by William Herschel in 1781 — the first planet found using a telescope.",
+        exploration: "Visited only once, by Voyager 2 during its 1986 flyby; no dedicated mission has been sent since.",
+        uniqueFact: "It rotates almost on its side, with an axial tilt of about 98°, likely the result of an ancient massive collision."
+      },
+      {
+        id: "planet-neptune",
+        name: "Neptune",
+        color: "#3F63B8",
+        distance: "4,495M km",
+        diameter: "49,244 km",
+        dayLength: "16.1 hrs",
+        yearLength: "165 yrs",
+        moons: 14,
+        type: "Ice Giant",
+        hook: "Fastest winds in the Solar System; found by math before it was observed.",
+        highlight: "Strongest winds in the Solar System, deep blue color, discovered through mathematical prediction",
+        composition: "Ice giant with a composition similar to Uranus: water, ammonia, and methane ices plus hydrogen and helium.",
+        atmosphere: "Hydrogen/helium/methane atmosphere; home to the strongest winds in the Solar System, reaching about 2,100 km/h.",
+        notableMoons: "14 known moons, notably Triton, which orbits in the opposite direction to Neptune's rotation.",
+        discovery: "Discovered in 1846 by Johann Galle, based on calculations by Urbain Le Verrier predicting its position.",
+        exploration: "Visited only once, by Voyager 2 during its 1989 flyby; no dedicated mission has been sent since.",
+        uniqueFact: "Known for its deep blue color and for being the only planet discovered through mathematical prediction rather than direct observation.",
+        texture: "Neptune1.jpg"
+      }
+    ];
+
+    // Render Planet Sections
+    const planetsContainer = document.getElementById('planets-sequence');
+    planetsContainer.innerHTML = PLANET_DATA.map((p, idx) => {
+      const prevTarget = idx === 0 ? 'scene-sun' : PLANET_DATA[idx - 1].id;
+      const nextTarget = idx === PLANET_DATA.length - 1 ? null : PLANET_DATA[idx + 1].id;
+
+      return `
+        <section id="${p.id}" class="journey-section planet-section" data-scene="${p.id}" style="--current-accent: ${p.color};">
+          <div class="content-wrapper">
+            <div class="text-column">
+              <span class="scene-badge" style="color: ${p.color};">Stop ${idx + 1} of 8 &middot; ${p.type}</span>
+              <h2 class="scene-title">${p.name}</h2>
+              <p class="scene-hook">${p.hook}</p>
+              
+              <div class="stats-strip">
+                <div class="stat-item">
+                  <span class="stat-label">Distance from Sun</span>
+                  <span class="stat-value">${p.distance}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Diameter</span>
+                  <span class="stat-value">${p.diameter}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Day Length</span>
+                  <span class="stat-value">${p.dayLength}</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Moons</span>
+                  <span class="stat-value">${p.moons}</span>
+                </div>
+              </div>
+
+              <ul class="facts-list">
+                <li class="fact-item">${p.composition}</li>
+                <li class="fact-item">${p.uniqueFact}</li>
+              </ul>
+
+              <div class="action-row">
+                <button class="nav-btn" onclick="scrollToScene('${prevTarget}')">&larr; Previous</button>
+                ${nextTarget ? `<button class="nav-btn" onclick="scrollToScene('${nextTarget}')">Next &rarr;</button>` : ''}
+                ${p.hasDetour ? `<button class="branch-btn" onclick="openMoonDetour()">Detour: Earth-Moon System</button>` : ''}
+              </div>
+
+              <button class="deep-dive-toggle" onclick="toggleDeepDive('${p.id}')">
+                More research & details &darr;
+              </button>
+
+              <div class="deep-dive-panel" id="deep-dive-${p.id}">
+                <h4 class="deep-dive-heading">Scientific Profile &amp; Mission History</h4>
+                <div class="deep-dive-grid">
+                  <div class="deep-dive-field">
+                    <strong>Atmosphere &amp; Temperature:</strong>
+                    <span>${p.atmosphere}</span>
+                  </div>
+                  <div class="deep-dive-field">
+                    <strong>Notable Moons:</strong>
+                    <span>${p.notableMoons}</span>
+                  </div>
+                  <div class="deep-dive-field">
+                    <strong>Discovery:</strong>
+                    <span>${p.discovery}</span>
+                  </div>
+                  <div class="deep-dive-field">
+                    <strong>Exploration:</strong>
+                    <span>${p.exploration}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="visual-slot" id="slot-${p.id}"></div>
+          </div>
+        </section>
+      `;
+    }).join('');
+
+    // Setup Orbit Rail Stops (Square-root compressed distance scale per Master Prompt)
+    const railStopsContainer = document.getElementById('rail-stops');
+    // Square root compression of distance
+    const rawDistances = [57.9, 108.2, 149.6, 227.9, 778.5, 1434, 2871, 4495];
+    const sqrtDistances = rawDistances.map(d => Math.sqrt(d));
+    const minSqrt = sqrtDistances[0];
+    const maxSqrt = sqrtDistances[sqrtDistances.length - 1];
+
+    // Sizes proportional to compressed planet diameter (Mercury 7px to Jupiter 16px)
+    const stopSizes = [7, 10, 11, 8, 16, 14, 11, 10];
+
+    PLANET_DATA.forEach((p, i) => {
+      // Percentage position along rail from 5% to 95%
+      const pct = 6 + ((sqrtDistances[i] - minSqrt) / (maxSqrt - minSqrt)) * 88;
+      const btn = document.createElement('button');
+      btn.className = 'rail-stop-btn';
+      btn.style.left = `${pct}%`;
+      btn.id = `rail-stop-${p.id}`;
+      btn.setAttribute('aria-label', `${p.name}, planet ${i + 1} of 8`);
+      btn.title = `${p.name} (${p.distance})`;
+      btn.onclick = () => scrollToScene(p.id);
+
+      btn.innerHTML = `
+        <span class="stop-label">${p.name}</span>
+        <span class="stop-dot" style="width: ${stopSizes[i]}px; height: ${stopSizes[i]}px; background-color: ${p.color};"></span>
+      `;
+      railStopsContainer.appendChild(btn);
+    });
+
+    // Navigation & Scroll Helpers
+    function scrollToScene(sceneId) {
+      const el = document.getElementById(sceneId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    document.getElementById('start-journey-btn').addEventListener('click', () => {
+      scrollToScene('scene-milky-way');
+    });
+
+    function toggleDeepDive(planetId) {
+      const panel = document.getElementById(`deep-dive-${planetId}`);
+      if (panel) {
+        panel.classList.toggle('open');
+      }
+    }
+
+    function openMoonDetour() {
+      document.getElementById('moon-detour-modal').classList.add('open');
+    }
+    function closeMoonDetour() {
+      document.getElementById('moon-detour-modal').classList.remove('open');
+    }
+    document.getElementById('close-moon-detour').addEventListener('click', closeMoonDetour);
+
+    // Audio Synthesizer (Ambient Space Tone - Web Audio API, Opt-in)
+    let audioCtx = null;
+    let synthRunning = false;
+    let synthOscs = [];
+    const audioToggle = document.getElementById('audio-toggle');
+
+    function toggleAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (!synthRunning) {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        // Create subtle harmonic ambient pad
+        const baseFreqs = [55, 110, 164.81, 220]; // A1, A2, E3, A3
+        baseFreqs.forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+          
+          // Gentle LFO for deep space drift
+          const lfo = audioCtx.createOscillator();
+          const lfoGain = audioCtx.createGain();
+          lfo.frequency.value = 0.08 + idx * 0.03;
+          lfoGain.gain.value = 1.2;
+          lfo.connect(osc.frequency);
+          lfo.start();
+
+          gain.gain.setValueAtTime(0.015 / (idx + 1), audioCtx.currentTime);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          synthOscs.push({ osc, gain, lfo });
+        });
+        synthRunning = true;
+        audioToggle.textContent = "Sound: On";
+        audioToggle.classList.add('active');
+      } else {
+        synthOscs.forEach(s => {
+          try { s.osc.stop(); s.lfo.stop(); } catch(e) {}
+        });
+        synthOscs = [];
+        synthRunning = false;
+        audioToggle.textContent = "Sound: Off";
+        audioToggle.classList.remove('active');
+      }
+    }
+    audioToggle.addEventListener('click', toggleAudio);
+
+    // ----------------------------------------------------
+    // THREE.JS 3D RENDER PIPELINE
+    // ----------------------------------------------------
+    const container = document.getElementById('webgl-viewport');
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x05060c, 0.0007);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000);
+    camera.position.set(0, 0, 800);
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    container.appendChild(renderer.domElement);
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
+    scene.add(ambientLight);
+
+    const sunLight = new THREE.PointLight(0xfffaed, 2.2, 3000);
+    sunLight.position.set(0, 0, 100);
+    scene.add(sunLight);
+
+    // Starfield (Static background per design spec)
+    const starGeo = new THREE.BufferGeometry();
+    const starCount = 3500;
+    const starPositions = new Float32Array(starCount * 3);
+    const starColors = new Float32Array(starCount * 3);
+
+    for (let i = 0; i < starCount; i++) {
+      starPositions[i * 3] = (Math.random() - 0.5) * 3000;
+      starPositions[i * 3 + 1] = (Math.random() - 0.5) * 3000;
+      starPositions[i * 3 + 2] = (Math.random() - 0.5) * 2000 - 400;
+
+      const shade = 0.6 + Math.random() * 0.4;
+      starColors[i * 3] = shade;
+      starColors[i * 3 + 1] = shade * 0.95;
+      starColors[i * 3 + 2] = shade * 0.92;
+    }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+    starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+
+    const starMat = new THREE.PointsMaterial({
+      size: 2,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.75
+    });
+    const starField = new THREE.Points(starGeo, starMat);
+    scene.add(starField);
+
+    // 1. Milky Way Spiral (Particle Disc)
+    const galaxyGroup = new THREE.Group();
+    const galaxyCount = 18000;
+    const galaxyGeo = new THREE.BufferGeometry();
+    const galaxyPos = new Float32Array(galaxyCount * 3);
+    const galaxyCol = new Float32Array(galaxyCount * 3);
+    const arms = 2;
+
+    for (let i = 0; i < galaxyCount; i++) {
+      const r = Math.pow(Math.random(), 2.2) * 480;
+      const armAngle = ((i % arms) * ((2 * Math.PI) / arms));
+      const spin = r * 0.012;
+      const angle = armAngle + spin;
+      const spreadX = (Math.random() - 0.5) * (35 + r * 0.08);
+      const spreadY = (Math.random() - 0.5) * (18 + r * 0.04);
+      const spreadZ = (Math.random() - 0.5) * (35 + r * 0.08);
+
+      galaxyPos[i * 3] = Math.cos(angle) * r + spreadX;
+      galaxyPos[i * 3 + 1] = spreadY;
+      galaxyPos[i * 3 + 2] = Math.sin(angle) * r + spreadZ;
+
+      // Color from core gold/white to edge blue/violet
+      const coreMix = Math.max(0, 1 - r / 260);
+      galaxyCol[i * 3] = 0.9 + coreMix * 0.1;
+      galaxyCol[i * 3 + 1] = 0.75 + coreMix * 0.25;
+      galaxyCol[i * 3 + 2] = 0.6 + (1 - coreMix) * 0.35;
+    }
+    galaxyGeo.setAttribute('position', new THREE.BufferAttribute(galaxyPos, 3));
+    galaxyGeo.setAttribute('color', new THREE.BufferAttribute(galaxyCol, 3));
+    const galaxyMat = new THREE.PointsMaterial({
+      size: 2.4,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending
+    });
+    const galaxy = new THREE.Points(galaxyGeo, galaxyMat);
+    galaxyGroup.add(galaxy);
+
+    // "You are here" Orion Arm Marker
+    const markerGeo = new THREE.SphereGeometry(4, 16, 16);
+    const markerMat = new THREE.MeshBasicMaterial({ color: 0xe7a93c });
+    const orionMarker = new THREE.Mesh(markerGeo, markerMat);
+    orionMarker.position.set(130, 0, 60);
+    galaxyGroup.add(orionMarker);
+
+    scene.add(galaxyGroup);
+
+    // 2. Solar System Schematic Scene
+    const solarSystemGroup = new THREE.Group();
+    solarSystemGroup.position.set(0, 0, -2000); // Placed further in depth
+
+    // Central Mini-Sun for Solar System Scene
+    const miniSunGeo = new THREE.SphereGeometry(18, 32, 32);
+    const miniSunMat = new THREE.MeshBasicMaterial({ color: 0xf2b63c });
+    const miniSun = new THREE.Mesh(miniSunGeo, miniSunMat);
+    solarSystemGroup.add(miniSun);
+
+    // Schematic Orbit Rings
+    const orbitRadii = [40, 65, 95, 130, 195, 260, 320, 380];
+    orbitRadii.forEach(r => {
+      const ringGeo = new THREE.RingGeometry(r - 0.5, r + 0.5, 64);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: 0xece7dc,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.15
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = Math.PI / 2;
+      solarSystemGroup.add(ring);
+    });
+    scene.add(solarSystemGroup);
+
+    // 3. Close-up Sun Scene
+    const sunGroup = new THREE.Group();
+    sunGroup.position.set(0, 0, -4000);
+    const sunGeo = new THREE.SphereGeometry(120, 48, 48);
+    const sunMat = new THREE.MeshBasicMaterial({
+      color: 0xf2b63c,
+      wireframe: false
+    });
+    const theSun = new THREE.Mesh(sunGeo, sunMat);
+    sunGroup.add(theSun);
+
+    // Sun Corona Glow
+    const coronaGeo = new THREE.SphereGeometry(140, 32, 32);
+    const coronaMat = new THREE.MeshBasicMaterial({
+      color: 0xe7a93c,
+      transparent: true,
+      opacity: 0.25,
+      side: THREE.BackSide
+    });
+    const sunCorona = new THREE.Mesh(coronaGeo, coronaMat);
+    sunGroup.add(sunCorona);
+    scene.add(sunGroup);
+
+    // 4. Planet 3D Models
+    const textureLoader = new THREE.TextureLoader();
+    const planetMeshes = {};
+
+    // Helper to generate procedural canvas texture for each planet
+    function createProceduralTexture(baseColorHex, detailType) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = baseColorHex;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (detailType === 'bands') {
+        for (let i = 0; i < 256; i += 6) {
+          ctx.fillStyle = `rgba(0,0,0,${Math.random() * 0.18})`;
+          ctx.fillRect(0, i, 512, Math.random() * 5 + 1);
+        }
+      } else if (detailType === 'craters') {
+        for (let i = 0; i < 70; i++) {
+          const x = Math.random() * 512;
+          const y = Math.random() * 256;
+          const r = Math.random() * 12 + 2;
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0,0,0,0.2)';
+          ctx.fill();
+        }
+      } else if (detailType === 'clouds') {
+        for (let i = 0; i < 40; i++) {
+          const x = Math.random() * 512;
+          const y = Math.random() * 256;
+          ctx.fillStyle = 'rgba(255,255,255,0.25)';
+          ctx.beginPath();
+          ctx.arc(x, y, Math.random() * 30 + 10, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      return new THREE.CanvasTexture(canvas);
+    }
+
+    PLANET_DATA.forEach((p, index) => {
+      const pGroup = new THREE.Group();
+      pGroup.position.set(0, 0, -6000 - index * 1800);
+
+      const radius = 95; // Optical size band centered right
+      const sphereGeo = new THREE.SphereGeometry(radius, 48, 48);
+
+      let pTexture;
+      if (p.texture) {
+        pTexture = textureLoader.load(
+          `/${p.texture}`,
+          () => renderer.render(scene, camera),
+          undefined,
+          () => {
+            // Fallback to procedural texture
+            sphereMat.map = createProceduralTexture(p.color, p.type === 'Gas Giant' ? 'bands' : 'craters');
+            sphereMat.needsUpdate = true;
+          }
+        );
+      } else {
+        pTexture = createProceduralTexture(p.color, p.type === 'Ice Giant' ? 'bands' : 'clouds');
+      }
+
+      const sphereMat = new THREE.MeshStandardMaterial({
+        map: pTexture,
+        color: new THREE.Color(p.color),
+        roughness: 0.85,
+        metalness: 0.1
+      });
+
+      const orbMesh = new THREE.Mesh(sphereGeo, sphereMat);
+      if (p.name === 'Uranus') {
+        orbMesh.rotation.z = THREE.MathUtils.degToRad(98); // 98° axial tilt
+      }
+      pGroup.add(orbMesh);
+
+      // Saturn Rings
+      if (p.hasRings) {
+        const ringGeo = new THREE.RingGeometry(125, 210, 64);
+        const ringMat = new THREE.MeshStandardMaterial({
+          color: 0xd8c08a,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.8
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = Math.PI / 2.3;
+        pGroup.add(ring);
+      }
+
+      scene.add(pGroup);
+      planetMeshes[p.id] = { group: pGroup, orb: orbMesh };
+    });
+
+    // ----------------------------------------------------
+    // SCROLL SYNCHRONIZATION & ACTIVE STAGE TRACKING
+    // ----------------------------------------------------
+    const allSections = [
+      { id: 'page-cover', type: 'cover' },
+      { id: 'scene-milky-way', type: 'milky_way' },
+      { id: 'scene-solar-system', type: 'solar_system' },
+      { id: 'scene-sun', type: 'sun' },
+      ...PLANET_DATA.map(p => ({ id: p.id, type: 'planet', planet: p }))
+    ];
+
+    let currentActiveSceneId = 'page-cover';
+
+    function updateSceneState() {
+      const scrollY = window.scrollY;
+      const windowH = window.innerHeight;
+      const isDesktop = window.innerWidth >= 1024;
+
+      // Find current section in view
+      let activeSec = allSections[0];
+      allSections.forEach(sec => {
+        const el = document.getElementById(sec.id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= windowH * 0.45 && rect.bottom >= windowH * 0.45) {
+            activeSec = sec;
+          }
+        }
+      });
+
+      if (activeSec.id !== currentActiveSceneId) {
+        currentActiveSceneId = activeSec.id;
+
+        // Update Rail Stops highlight
+        document.querySelectorAll('.rail-stop-btn').forEach(btn => {
+          btn.removeAttribute('aria-current');
+        });
+        const activeBtn = document.getElementById(`rail-stop-${activeSec.id}`);
+        if (activeBtn) {
+          activeBtn.setAttribute('aria-current', 'page');
+        }
+
+        // Update rail progress line
+        const progressFill = document.getElementById('rail-progress');
+        if (activeSec.planet) {
+          const planetIdx = PLANET_DATA.findIndex(p => p.id === activeSec.id);
+          const pct = 6 + ((sqrtDistances[planetIdx] - minSqrt) / (maxSqrt - minSqrt)) * 88;
+          progressFill.style.width = `${pct}%`;
+          document.documentElement.style.setProperty('--current-accent', activeSec.planet.color);
+        } else if (activeSec.id === 'scene-sun') {
+          progressFill.style.width = `0%`;
+          document.documentElement.style.setProperty('--current-accent', 'var(--sun)');
+        } else {
+          progressFill.style.width = `0%`;
+          document.documentElement.style.setProperty('--current-accent', 'var(--solar)');
+        }
+      }
+
+      // 3D Camera & Scene Transitions based on scroll position
+      const totalH = document.documentElement.scrollHeight - windowH;
+      const progress = totalH > 0 ? scrollY / totalH : 0;
+
+      // Target X position: planet centered on the right column on desktop (56% visual column)
+      const targetX = isDesktop ? 180 : 0;
+
+      if (activeSec.id === 'page-cover') {
+        gsap.to(camera.position, { x: 0, y: 0, z: 800, duration: 1, ease: 'power2.out' });
+        gsap.to(galaxyGroup.rotation, { x: 0, duration: 1 });
+      } else if (activeSec.id === 'scene-milky-way') {
+        gsap.to(camera.position, { x: targetX, y: 120, z: 650, duration: 1, ease: 'power2.out' });
+        gsap.to(galaxyGroup.rotation, { x: 0.75, duration: 1 }); // 3/4 angled view
+      } else if (activeSec.id === 'scene-solar-system') {
+        gsap.to(camera.position, { x: targetX, y: 80, z: -1600, duration: 1, ease: 'power2.out' });
+      } else if (activeSec.id === 'scene-sun') {
+        gsap.to(camera.position, { x: targetX, y: 0, z: -3600, duration: 1, ease: 'power2.out' });
+      } else if (activeSec.planet) {
+        const pIdx = PLANET_DATA.findIndex(p => p.id === activeSec.id);
+        const targetZ = -6000 - pIdx * 1800 + 320;
+        gsap.to(camera.position, { x: targetX, y: 0, z: targetZ, duration: 1, ease: 'power2.out' });
+      }
+    }
+
+    window.addEventListener('scroll', updateSceneState, { passive: true });
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      updateSceneState();
+    });
+
+    // Ambient Continuous Rotation Loop (40-60s per turn)
+    let lastTime = performance.now();
+    function animate() {
+      requestAnimationFrame(animate);
+      const now = performance.now();
+      const delta = (now - lastTime) * 0.001;
+      lastTime = now;
+
+      // Slow galaxy rotation
+      galaxyGroup.rotation.y += delta * 0.05;
+
+      // Slow continuous spin for all planets
+      Object.values(planetMeshes).forEach(item => {
+        item.orb.rotation.y += delta * 0.12;
+      });
+      miniSun.rotation.y += delta * 0.08;
+      theSun.rotation.y += delta * 0.05;
+
+      renderer.render(scene, camera);
+    }
+    animate();
+    updateSceneState();
+  </script>
+</body>
+</html>
